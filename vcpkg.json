@@ -2,5 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "test-project",
   "version": "0.1.0",
-  "dependencies": ["catch2", "benchmark"]
+  "dependencies": [{
+    "name": "qtbase",
+    "features": ["gui", "widgets", "opengl", "wayland"]
+  },"catch2", "benchmark", "opengl", "glm", "glad", "glfw3"]
 }

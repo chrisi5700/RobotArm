@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.28)
-project(test_project)
+project(opengl_test)
 
 # Include CMake modules for target helpers and compiler settings
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(TargetHelpers)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
+find_package(OpenGL REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+set(CMAKE_AUTOMOC ON)
 
 # Default cache variables (can be overridden by CMakePresets.json or command line)
 set(ENABLE_COMPILER_WARNINGS ON CACHE BOOL "Enable compiler warnings")
