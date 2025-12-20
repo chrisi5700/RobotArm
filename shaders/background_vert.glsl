@@ -1,4 +1,3 @@
-// background.vert
 #version 300 es
 precision highp float;
 out vec2 TexCoord;

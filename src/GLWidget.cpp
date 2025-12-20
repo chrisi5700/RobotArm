@@ -12,18 +12,26 @@ using std::chrono_literals::operator ""ms;
 
 GLWidget::GLWidget(QWidget* parent)
 	: QOpenGLWidget(parent)
-	, m_scene(nullptr)  // Don't create yet - no GL context!
+	, m_scene(nullptr)
 	, m_frame_timer(16ms)
 {
-	// Request OpenGL 4.6 Core Profile
 	QSurfaceFormat format;
+	format.setDepthBufferSize(24);
+	format.setStencilBufferSize(8);
+	format.setSwapInterval(1);  // VSync
+
+#ifdef __EMSCRIPTEN__
+	// WebGL 2 = OpenGL ES 3.0
+	format.setVersion(3, 0);
+	format.setRenderableType(QSurfaceFormat::OpenGLES);
+#else
+	// Desktop OpenGL 4.6 Core
 	format.setVersion(4, 6);
 	format.setProfile(QSurfaceFormat::CoreProfile);
-	format.setDepthBufferSize(24);
-	format.setSwapInterval(1);  // VSync
+#endif
+
 	setFormat(format);
 
-	// Connect timer to update
 	connect(&m_frame_timer, &QChronoTimer::timeout, this, QOverload<>::of(&GLWidget::update));
 }
 
