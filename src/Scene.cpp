@@ -50,37 +50,43 @@ GLint create_program(std::filesystem::path vert_filename, std::filesystem::path 
 
 void Scene::upload_shader_params()
 {
-	glUseProgram(m_program);
+    glUseProgram(m_program);
 
-	// Lighting
-	glUniform3fv(glGetUniformLocation(m_program, "lightColor"), 1, glm::value_ptr(m_params.lightColor));
-	glUniform1f(glGetUniformLocation(m_program, "lightIntensity"), m_params.lightIntensity);
-	glUniform1f(glGetUniformLocation(m_program, "ambientStrength"), m_params.ambientStrength);
-	glUniform1f(glGetUniformLocation(m_program, "diffuseStrength"), m_params.diffuseStrength);
-	glUniform1f(glGetUniformLocation(m_program, "specularStrength"), m_params.specularStrength);
-	glUniform1f(glGetUniformLocation(m_program, "shininess"), m_params.shininess);
+    // Light
+    glUniform3fv(glGetUniformLocation(m_program, "lightColor"), 1, glm::value_ptr(m_params.lightColor));
+    glUniform1f(glGetUniformLocation(m_program, "lightIntensity"), m_params.lightIntensity);
 
-	// Fresnel
-	glUniform1i(glGetUniformLocation(m_program, "enableFresnel"), m_params.enableFresnel);
-	glUniform1f(glGetUniformLocation(m_program, "fresnelBias"), m_params.fresnelBias);
-	glUniform1f(glGetUniformLocation(m_program, "fresnelScale"), m_params.fresnelScale);
-	glUniform1f(glGetUniformLocation(m_program, "fresnelPower"), m_params.fresnelPower);
+    // Shadow/cel shading
+    glUniform1f(glGetUniformLocation(m_program, "shadowThreshold"), m_params.shadowThreshold);
+    glUniform1f(glGetUniformLocation(m_program, "shadowSoftness"), m_params.shadowSoftness);
+    glUniform3fv(glGetUniformLocation(m_program, "shadowTint"), 1, glm::value_ptr(m_params.shadowTint));
+    glUniform1f(glGetUniformLocation(m_program, "shadowStrength"), m_params.shadowStrength);
 
-	// Rim
-	glUniform1i(glGetUniformLocation(m_program, "enableRimLight"), m_params.enableRimLight);
-	glUniform3fv(glGetUniformLocation(m_program, "rimColor"), 1, glm::value_ptr(m_params.rimColor));
-	glUniform1f(glGetUniformLocation(m_program, "rimPower"), m_params.rimPower);
-	glUniform1f(glGetUniformLocation(m_program, "rimStrength"), m_params.rimStrength);
+    // Specular
+    glUniform1i(glGetUniformLocation(m_program, "enableSpecular"), m_params.enableSpecular);
+    glUniform1f(glGetUniformLocation(m_program, "specularThreshold"), m_params.specularThreshold);
+    glUniform1f(glGetUniformLocation(m_program, "specularSize"), m_params.specularSize);
 
-	// Fog
-	glUniform1i(glGetUniformLocation(m_program, "enableHeightFog"), m_params.enableFog);
-	glUniform3fv(glGetUniformLocation(m_program, "fogColor"), 1, glm::value_ptr(m_params.fogColor));
-	glUniform1f(glGetUniformLocation(m_program, "fogDensity"), m_params.fogDensity);
-	glUniform1f(glGetUniformLocation(m_program, "fogHeightFalloff"), m_params.fogHeightFalloff);
+    // Rim
+    glUniform1i(glGetUniformLocation(m_program, "enableRimLight"), m_params.enableRimLight);
+    glUniform3fv(glGetUniformLocation(m_program, "rimColor"), 1, glm::value_ptr(m_params.rimColor));
+    glUniform1f(glGetUniformLocation(m_program, "rimThreshold"), m_params.rimThreshold);
+    glUniform1f(glGetUniformLocation(m_program, "rimSoftness"), m_params.rimSoftness);
 
-	// Gamma
-	glUniform1i(glGetUniformLocation(m_program, "enableGammaCorrection"), m_params.enableGamma);
-	glUniform1f(glGetUniformLocation(m_program, "gamma"), m_params.gamma);
+    // Outline
+    glUniform1i(glGetUniformLocation(m_program, "enableOutline"), m_params.enableOutline);
+    glUniform1f(glGetUniformLocation(m_program, "outlineThreshold"), m_params.outlineThreshold);
+    glUniform1f(glGetUniformLocation(m_program, "outlineStrength"), m_params.outlineStrength);
+
+    // Fog
+    glUniform1i(glGetUniformLocation(m_program, "enableHeightFog"), m_params.enableFog);
+    glUniform3fv(glGetUniformLocation(m_program, "fogColor"), 1, glm::value_ptr(m_params.fogColor));
+    glUniform1f(glGetUniformLocation(m_program, "fogDensity"), m_params.fogDensity);
+    glUniform1f(glGetUniformLocation(m_program, "fogHeightFalloff"), m_params.fogHeightFalloff);
+
+    // Gamma
+    glUniform1i(glGetUniformLocation(m_program, "enableGammaCorrection"), m_params.enableGamma);
+    glUniform1f(glGetUniformLocation(m_program, "gamma"), m_params.gamma);
 }
 
 Scene::Scene() :
@@ -155,5 +161,9 @@ Scene::~Scene()
 	if (m_program)
 	{
 		glDeleteProgram(m_program);
+	}
+	if (m_background_program)
+	{
+		glDeleteProgram(m_background_program);
 	}
 }

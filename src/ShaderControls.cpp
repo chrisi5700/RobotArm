@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/18/25.
-//
-// ShaderControls.cpp
 #include <QtRendering/ShaderControls.hpp>
 #include <QScrollArea>
 
@@ -59,7 +55,7 @@ FloatSlider::FloatSlider(const QString& label, float min, float max, float initi
 
     m_slider = new QSlider(Qt::Horizontal);
     m_slider->setRange(0, 1000);
-    m_slider->setValue((initial - min) / (max - min) * 1000);
+    m_slider->setValue(static_cast<int>((initial - min) / (max - min) * 1000));
 
     m_valueLabel = new QLabel(QString::number(initial, 'f', 2));
     m_valueLabel->setFixedWidth(40);
@@ -91,36 +87,58 @@ ShaderControls::ShaderControls(QWidget* parent)
     auto* scrollWidget = new QWidget();
     auto* scrollLayout = new QVBoxLayout(scrollWidget);
 
-    scrollLayout->addWidget(createLightingGroup());
+    scrollLayout->addWidget(createShadowGroup());
+    scrollLayout->addWidget(createSpecularGroup());
     scrollLayout->addWidget(createRimLightGroup());
+    scrollLayout->addWidget(createOutlineGroup());
     scrollLayout->addWidget(createFogGroup());
     scrollLayout->addWidget(createBackgroundGroup());
     scrollLayout->addStretch();
 
     scrollArea->setWidget(scrollWidget);
     mainLayout->addWidget(scrollArea);
-
 }
 
-QGroupBox* ShaderControls::createLightingGroup()
+QGroupBox* ShaderControls::createShadowGroup()
 {
-    auto* group = new QGroupBox("Lighting");
+    auto* group = new QGroupBox("Cel Shading");
     auto* layout = new QVBoxLayout(group);
 
-    m_ambientSlider = new FloatSlider("Ambient", 0.0f, 1.0f, 0.15f);
-    m_diffuseSlider = new FloatSlider("Diffuse", 0.0f, 2.0f, 1.0f);
-    m_specularSlider = new FloatSlider("Specular", 0.0f, 2.0f, 0.5f);
-    m_shininessSlider = new FloatSlider("Shininess", 1.0f, 128.0f, 32.0f);
+    m_shadowThreshold = new FloatSlider("Threshold", -0.5f, 0.5f, 0.1f);
+    m_shadowSoftness = new FloatSlider("Softness", 0.0f, 0.3f, 0.05f);
+    m_shadowTint = new ColorPicker("Tint", glm::vec3(0.6f, 0.6f, 0.8f));
+    m_shadowStrength = new FloatSlider("Darkness", 0.0f, 1.0f, 0.4f);
 
-    layout->addWidget(m_ambientSlider);
-    layout->addWidget(m_diffuseSlider);
-    layout->addWidget(m_specularSlider);
-    layout->addWidget(m_shininessSlider);
+    layout->addWidget(m_shadowThreshold);
+    layout->addWidget(m_shadowSoftness);
+    layout->addWidget(m_shadowTint);
+    layout->addWidget(m_shadowStrength);
 
-    connect(m_ambientSlider, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
-    connect(m_diffuseSlider, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
-    connect(m_specularSlider, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
-    connect(m_shininessSlider, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_shadowThreshold, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_shadowSoftness, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_shadowTint, &ColorPicker::colorChanged, this, &ShaderControls::settingsChanged);
+    connect(m_shadowStrength, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+
+    return group;
+}
+
+QGroupBox* ShaderControls::createSpecularGroup()
+{
+    auto* group = new QGroupBox("Specular");
+    auto* layout = new QVBoxLayout(group);
+
+    m_specularEnabled = new QCheckBox("Enable");
+    m_specularEnabled->setChecked(true);
+    m_specularThreshold = new FloatSlider("Threshold", 0.5f, 0.99f, 0.9f);
+    m_specularSize = new FloatSlider("Tightness", 8.0f, 128.0f, 32.0f);
+
+    layout->addWidget(m_specularEnabled);
+    layout->addWidget(m_specularThreshold);
+    layout->addWidget(m_specularSize);
+
+    connect(m_specularEnabled, &QCheckBox::toggled, this, &ShaderControls::settingsChanged);
+    connect(m_specularThreshold, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_specularSize, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
 
     return group;
 }
@@ -132,19 +150,40 @@ QGroupBox* ShaderControls::createRimLightGroup()
 
     m_rimEnabled = new QCheckBox("Enable");
     m_rimEnabled->setChecked(true);
-    m_rimColor = new ColorPicker("Color", glm::vec3(0.3f, 0.4f, 0.5f));
-    m_rimPower = new FloatSlider("Power", 1.0f, 8.0f, 3.0f);
-    m_rimStrength = new FloatSlider("Strength", 0.0f, 2.0f, 0.5f);
+    m_rimColor = new ColorPicker("Color", glm::vec3(1.0f, 0.95f, 0.9f));
+    m_rimThreshold = new FloatSlider("Threshold", 0.3f, 0.9f, 0.65f);
+    m_rimSoftness = new FloatSlider("Softness", 0.0f, 0.3f, 0.1f);
 
     layout->addWidget(m_rimEnabled);
     layout->addWidget(m_rimColor);
-    layout->addWidget(m_rimPower);
-    layout->addWidget(m_rimStrength);
+    layout->addWidget(m_rimThreshold);
+    layout->addWidget(m_rimSoftness);
 
     connect(m_rimEnabled, &QCheckBox::toggled, this, &ShaderControls::settingsChanged);
     connect(m_rimColor, &ColorPicker::colorChanged, this, &ShaderControls::settingsChanged);
-    connect(m_rimPower, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
-    connect(m_rimStrength, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_rimThreshold, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_rimSoftness, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+
+    return group;
+}
+
+QGroupBox* ShaderControls::createOutlineGroup()
+{
+    auto* group = new QGroupBox("Edge Darkening");
+    auto* layout = new QVBoxLayout(group);
+
+    m_outlineEnabled = new QCheckBox("Enable");
+    m_outlineEnabled->setChecked(true);
+    m_outlineThreshold = new FloatSlider("Threshold", 0.1f, 0.6f, 0.25f);
+    m_outlineStrength = new FloatSlider("Strength", 0.0f, 1.0f, 0.6f);
+
+    layout->addWidget(m_outlineEnabled);
+    layout->addWidget(m_outlineThreshold);
+    layout->addWidget(m_outlineStrength);
+
+    connect(m_outlineEnabled, &QCheckBox::toggled, this, &ShaderControls::settingsChanged);
+    connect(m_outlineThreshold, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
+    connect(m_outlineStrength, &FloatSlider::valueChanged, this, &ShaderControls::settingsChanged);
 
     return group;
 }
@@ -175,8 +214,8 @@ QGroupBox* ShaderControls::createBackgroundGroup()
     auto* group = new QGroupBox("Background");
     auto* layout = new QVBoxLayout(group);
 
-    m_topColor = new ColorPicker("Top", glm::vec3(0.4f, 0.5f, 0.7f));
-    m_bottomColor = new ColorPicker("Bottom", glm::vec3(0.1f, 0.1f, 0.15f));
+    m_topColor = new ColorPicker("Top", glm::vec3(0.24f, 0.22f, 0.21f));
+    m_bottomColor = new ColorPicker("Bottom", glm::vec3(0.0f));
 
     layout->addWidget(m_topColor);
     layout->addWidget(m_bottomColor);
@@ -187,20 +226,33 @@ QGroupBox* ShaderControls::createBackgroundGroup()
     return group;
 }
 
-// Getters
-float ShaderControls::getAmbientStrength() const { return m_ambientSlider->getValue(); }
-float ShaderControls::getDiffuseStrength() const { return m_diffuseSlider->getValue(); }
-float ShaderControls::getSpecularStrength() const { return m_specularSlider->getValue(); }
-float ShaderControls::getShininess() const { return m_shininessSlider->getValue(); }
+// Shadow getters
+float ShaderControls::getShadowThreshold() const { return m_shadowThreshold->getValue(); }
+float ShaderControls::getShadowSoftness() const { return m_shadowSoftness->getValue(); }
+glm::vec3 ShaderControls::getShadowTint() const { return m_shadowTint->getColor(); }
+float ShaderControls::getShadowStrength() const { return m_shadowStrength->getValue(); }
 
+// Specular getters
+bool ShaderControls::isSpecularEnabled() const { return m_specularEnabled->isChecked(); }
+float ShaderControls::getSpecularThreshold() const { return m_specularThreshold->getValue(); }
+float ShaderControls::getSpecularSize() const { return m_specularSize->getValue(); }
+
+// Rim getters
 bool ShaderControls::isRimLightEnabled() const { return m_rimEnabled->isChecked(); }
 glm::vec3 ShaderControls::getRimColor() const { return m_rimColor->getColor(); }
-float ShaderControls::getRimPower() const { return m_rimPower->getValue(); }
-float ShaderControls::getRimStrength() const { return m_rimStrength->getValue(); }
+float ShaderControls::getRimThreshold() const { return m_rimThreshold->getValue(); }
+float ShaderControls::getRimSoftness() const { return m_rimSoftness->getValue(); }
 
+// Outline getters
+bool ShaderControls::isOutlineEnabled() const { return m_outlineEnabled->isChecked(); }
+float ShaderControls::getOutlineThreshold() const { return m_outlineThreshold->getValue(); }
+float ShaderControls::getOutlineStrength() const { return m_outlineStrength->getValue(); }
+
+// Fog getters
 bool ShaderControls::isFogEnabled() const { return m_fogEnabled->isChecked(); }
 glm::vec3 ShaderControls::getFogColor() const { return m_fogColor->getColor(); }
 float ShaderControls::getFogDensity() const { return m_fogDensity->getValue(); }
 
+// Background getters
 glm::vec3 ShaderControls::getTopColor() const { return m_topColor->getColor(); }
 glm::vec3 ShaderControls::getBottomColor() const { return m_bottomColor->getColor(); }

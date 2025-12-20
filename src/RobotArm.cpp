@@ -6,7 +6,7 @@
 
 
 
-RobotArm::RobotArm() : m_segments(generate_cube()), m_joints(generate_sphere(0.3f, 10, 10))
+RobotArm::RobotArm() : m_segments(generate_cube()), m_joints(generate_sphere(0.3f, 20, 20))
 {}
 void RobotArm::add_component(float length, float angle)
 {
@@ -37,7 +37,8 @@ void RobotArm::build_instance_data()
 	sphere_instances.clear();
 	auto floor_model = glm::scale(glm::mat4{1}, glm::vec3{100.0f, 0.5f, 100.0f});
 	floor_model = glm::translate(floor_model, glm::vec3(0, -1, 0));
-	cube_instances.emplace_back(floor_model,  glm::vec3{0.5f, 0.5f, 0.5f});
+	// cube_instances.emplace_back(floor_model,  glm::vec3{69 / 255.f,133 / 255.f,136 / 255.f});
+															// Gruvbox Blue
 
 	// This tracks "where is the current joint and what direction are we facing"
 	glm::mat4 joint = glm::mat4(1.0f);
@@ -55,10 +56,12 @@ void RobotArm::build_instance_data()
 						  * glm::translate(glm::mat4(1.0f), glm::vec3(0, component.length / 2.0f, 0))
 						  * glm::scale(glm::mat4(1.0f), glm::vec3(0.3f, component.length, 0.3f));
 
-		cube_instances.emplace_back(segment, glm::vec3(0.2f, 0.9f, 0.2f));
+		cube_instances.emplace_back(segment, glm::vec3(142 / 255.f, 192 / 255.f, 124 / 255.f));
+																	// ^^ Gruvbox Green
 
 		// 3. Move joint to the END of this segment (for next iteration)
-		sphere_instances.emplace_back(joint, glm::vec3(0.8f, 0.2f, 0.2f));
+		sphere_instances.emplace_back(joint, glm::vec3(204 / 255.f,36 / 255.f,29 / 255.f));
+																	// ^^ Gruvbox Red
 		joint = joint * glm::translate(glm::mat4(1.0f), glm::vec3(0, component.length, 0));
 	}
 }

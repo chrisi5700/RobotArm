@@ -10,36 +10,42 @@ in float v_Height;
 
 out vec4 FragColor;
 
-// Light parameters
+// Light
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform float lightIntensity;
 
-// Material parameters (tweakable!)
-uniform float ambientStrength;
-uniform float diffuseStrength;
-uniform float specularStrength;
-uniform float shininess;
+// Cel shading
+uniform float shadowThreshold;    // Where shadow starts (0.0-0.5)
+uniform float shadowSoftness;     // Transition width
+uniform vec3 shadowTint;          // Multiplied with base color in shadow
+uniform float shadowStrength;     // How dark shadows are (0-1)
 
-// Effect toggles and parameters
+// Specular highlight
+uniform bool enableSpecular;
+uniform float specularThreshold;
+uniform float specularSize;       // Smaller = tighter highlight
+
+// Rim light
 uniform bool enableRimLight;
 uniform vec3 rimColor;
-uniform float rimPower;
-uniform float rimStrength;
+uniform float rimThreshold;
+uniform float rimSoftness;
 
+// Edge darkening
+uniform bool enableOutline;
+uniform float outlineThreshold;
+uniform float outlineStrength;
+
+// Fog
 uniform bool enableHeightFog;
 uniform vec3 fogColor;
 uniform float fogDensity;
 uniform float fogHeightFalloff;
 
+// Gamma
 uniform bool enableGammaCorrection;
 uniform float gamma;
-
-// Fresnel for more realistic reflections
-uniform bool enableFresnel;
-uniform float fresnelBias;
-uniform float fresnelScale;
-uniform float fresnelPower;
 
 void main()
 {
@@ -47,37 +53,59 @@ void main()
     vec3 viewDir = normalize(v_ViewPos - v_FragPos);
     vec3 lightDir = normalize(lightPos - v_FragPos);
 
-    vec3 objectColor = v_Color;
+    vec3 baseColor = v_Color;
 
-    // Ambient
-    vec3 ambient = ambientStrength * objectColor;
+    // ===================
+    // CEL SHADING - shadow/lit split
+    // ===================
+    float NdotL = dot(normal, lightDir);
 
-    // Diffuse
-    float NdotL = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diffuseStrength * NdotL * objectColor * lightColor * lightIntensity;
+    // Smooth threshold between shadow and lit
+    float lit = smoothstep(shadowThreshold - shadowSoftness,
+    shadowThreshold + shadowSoftness, NdotL);
 
-    // Specular (Blinn-Phong)
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float NdotH = max(dot(normal, halfDir), 0.0);
-    float spec = pow(NdotH, shininess);
-    vec3 specular = specularStrength * spec * lightColor * lightIntensity;
+    // Shadow color is base color darkened and tinted
+    vec3 shadowColor = baseColor * shadowTint * (1.0 - shadowStrength);
+    vec3 litColor = baseColor * lightColor * lightIntensity;
 
-    // Fresnel
-    if (enableFresnel) {
-        float fresnel = fresnelBias + fresnelScale * pow(1.0 - max(dot(viewDir, normal), 0.0), fresnelPower);
-        specular *= fresnel;
+    vec3 result = mix(shadowColor, litColor, lit);
+
+    // ===================
+    // SPECULAR - small hard highlight
+    // ===================
+    if (enableSpecular) {
+        vec3 reflectDir = reflect(-lightDir, normal);
+        float spec = max(dot(viewDir, reflectDir), 0.0);
+        spec = pow(spec, specularSize);
+        float specMask = smoothstep(specularThreshold - 0.02, specularThreshold + 0.02, spec);
+        // Additive highlight, but capped
+        result += specMask * lightColor * 0.3 * lit; // Only show on lit side
     }
 
-    vec3 result = ambient + diffuse + specular;
-
-    // Rim lighting
+    // ===================
+    // RIM LIGHT
+    // ===================
     if (enableRimLight) {
         float rim = 1.0 - max(dot(viewDir, normal), 0.0);
-        rim = pow(rim, rimPower);
-        result += rimStrength * rim * rimColor;
+        float rimMask = smoothstep(rimThreshold - rimSoftness,
+        rimThreshold + rimSoftness, rim);
+        // Rim shows more on lit side for that backlit look
+        float rimLit = mix(0.3, 1.0, lit);
+        result = mix(result, rimColor, rimMask * rimLit * 0.5);
     }
 
-    // Height fog
+    // ===================
+    // EDGE DARKENING
+    // ===================
+    if (enableOutline) {
+        float edge = 1.0 - max(dot(viewDir, normal), 0.0);
+        float outline = smoothstep(outlineThreshold, outlineThreshold + 0.1, edge);
+        result *= 1.0 - (outline * outlineStrength);
+    }
+
+    // ===================
+    // HEIGHT FOG
+    // ===================
     if (enableHeightFog) {
         float distance = length(v_ViewPos - v_FragPos);
         float heightFactor = exp(-v_Height * fogHeightFalloff);
@@ -86,7 +114,7 @@ void main()
         result = mix(result, fogColor, fogFactor);
     }
 
-    // Gamma correction
+    // Gamma
     if (enableGammaCorrection) {
         result = pow(result, vec3(1.0 / gamma));
     }

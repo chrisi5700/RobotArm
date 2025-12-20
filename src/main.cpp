@@ -83,27 +83,41 @@ int main(int argc, char* argv[]) {
             glWindow->get_scene().get_arm().remove_component(index);
         });
 
-    QObject::connect(shaderControls, &ShaderControls::settingsChanged,
-        [glWindow, shaderControls]() {
-            auto& params = glWindow->get_scene().get_shader_params();
+	QObject::connect(shaderControls, &ShaderControls::settingsChanged,
+	[glWindow, shaderControls]() {
+		auto& params = glWindow->get_scene().get_shader_params();
 
-            params.ambientStrength = shaderControls->getAmbientStrength();
-            params.diffuseStrength = shaderControls->getDiffuseStrength();
-            params.specularStrength = shaderControls->getSpecularStrength();
-            params.shininess = shaderControls->getShininess();
+		// Shadow
+		params.shadowThreshold = shaderControls->getShadowThreshold();
+		params.shadowSoftness = shaderControls->getShadowSoftness();
+		params.shadowTint = shaderControls->getShadowTint();
+		params.shadowStrength = shaderControls->getShadowStrength();
 
-            params.enableRimLight = shaderControls->isRimLightEnabled();
-            params.rimColor = shaderControls->getRimColor();
-            params.rimPower = shaderControls->getRimPower();
-            params.rimStrength = shaderControls->getRimStrength();
+		// Specular
+		params.enableSpecular = shaderControls->isSpecularEnabled();
+		params.specularThreshold = shaderControls->getSpecularThreshold();
+		params.specularSize = shaderControls->getSpecularSize();
 
-            params.enableFog = shaderControls->isFogEnabled();
-            params.fogColor = shaderControls->getFogColor();
-            params.fogDensity = shaderControls->getFogDensity();
+		// Rim
+		params.enableRimLight = shaderControls->isRimLightEnabled();
+		params.rimColor = shaderControls->getRimColor();
+		params.rimThreshold = shaderControls->getRimThreshold();
+		params.rimSoftness = shaderControls->getRimSoftness();
 
-            params.topColor = shaderControls->getTopColor();
-            params.bottomColor = shaderControls->getBottomColor();
-        });
+		// Outline
+		params.enableOutline = shaderControls->isOutlineEnabled();
+		params.outlineThreshold = shaderControls->getOutlineThreshold();
+		params.outlineStrength = shaderControls->getOutlineStrength();
+
+		// Fog
+		params.enableFog = shaderControls->isFogEnabled();
+		params.fogColor = shaderControls->getFogColor();
+		params.fogDensity = shaderControls->getFogDensity();
+
+		// Background
+		params.topColor = shaderControls->getTopColor();
+		params.bottomColor = shaderControls->getBottomColor();
+	});
 
     mainWindow.show();
     return app.exec();

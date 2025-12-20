@@ -1,4 +1,3 @@
-// ShaderControls.hpp
 #pragma once
 
 #include <QWidget>
@@ -10,7 +9,6 @@
 #include <QGroupBox>
 #include <QDoubleSpinBox>
 #include <glm/glm.hpp>
-#include <functional>
 
 class ColorPicker : public QWidget {
     Q_OBJECT
@@ -47,17 +45,27 @@ class ShaderControls : public QWidget {
 public:
     explicit ShaderControls(QWidget* parent = nullptr);
 
-    // Lighting
-    float getAmbientStrength() const;
-    float getDiffuseStrength() const;
-    float getSpecularStrength() const;
-    float getShininess() const;
+    // Shadow
+    float getShadowThreshold() const;
+    float getShadowSoftness() const;
+    glm::vec3 getShadowTint() const;
+    float getShadowStrength() const;
+
+    // Specular
+    bool isSpecularEnabled() const;
+    float getSpecularThreshold() const;
+    float getSpecularSize() const;
 
     // Rim light
     bool isRimLightEnabled() const;
     glm::vec3 getRimColor() const;
-    float getRimPower() const;
-    float getRimStrength() const;
+    float getRimThreshold() const;
+    float getRimSoftness() const;
+
+    // Outline
+    bool isOutlineEnabled() const;
+    float getOutlineThreshold() const;
+    float getOutlineStrength() const;
 
     // Fog
     bool isFogEnabled() const;
@@ -72,22 +80,34 @@ signals:
     void settingsChanged();
 
 private:
-    QGroupBox* createLightingGroup();
+    QGroupBox* createShadowGroup();
+    QGroupBox* createSpecularGroup();
     QGroupBox* createRimLightGroup();
+    QGroupBox* createOutlineGroup();
     QGroupBox* createFogGroup();
     QGroupBox* createBackgroundGroup();
 
-    // Lighting
-    FloatSlider* m_ambientSlider;
-    FloatSlider* m_diffuseSlider;
-    FloatSlider* m_specularSlider;
-    FloatSlider* m_shininessSlider;
+    // Shadow
+    FloatSlider* m_shadowThreshold;
+    FloatSlider* m_shadowSoftness;
+    ColorPicker* m_shadowTint;
+    FloatSlider* m_shadowStrength;
+
+    // Specular
+    QCheckBox* m_specularEnabled;
+    FloatSlider* m_specularThreshold;
+    FloatSlider* m_specularSize;
 
     // Rim
     QCheckBox* m_rimEnabled;
     ColorPicker* m_rimColor;
-    FloatSlider* m_rimPower;
-    FloatSlider* m_rimStrength;
+    FloatSlider* m_rimThreshold;
+    FloatSlider* m_rimSoftness;
+
+    // Outline
+    QCheckBox* m_outlineEnabled;
+    FloatSlider* m_outlineThreshold;
+    FloatSlider* m_outlineStrength;
 
     // Fog
     QCheckBox* m_fogEnabled;
