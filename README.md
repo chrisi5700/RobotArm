@@ -8,10 +8,15 @@ integration hell for quite a bit I finally managed to get this running.
 ## Features
 
 -[x] A working build system
+
 -[x] Extendable Robot Arm
+
 -[x] Shader Configuration
+
 -[ ] Making the arm toss something maybe
+
 -[ ] Targets for the arm to hit
+
 
 ## How to build this
 
