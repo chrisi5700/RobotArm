@@ -8,7 +8,7 @@
 #include <QElapsedTimer>
 #include <memory>
 
-class GLWindow : public QOpenGLWindow {
+class GLWindow : public {
 	Q_OBJECT
 public:
 	explicit GLWindow(QWindow* parent = nullptr);

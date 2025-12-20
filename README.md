@@ -1,149 +1,75 @@
-# CMake Starter Template
+# Robot Arm | WASM | QT | OpenGL
 
-This repository provides a structured C++ project template using **CMake** and **Nix flakes**.  
-It includes benchmarking, testing, and a dedicated playground for experimentation.
-
+Leveraging the power of C++ and emscripten I managed to create ABI issues in JS. After being stuck in dependency and 
+integration hell for quite a bit I finally managed to get this running.
 ---
 
 ## Features
 
-- **CMake-based project structure**
-- **Nix flake** for a reproducible development environment
-- **Google Benchmark** for performance analysis
-- **Catch2** for unit testing
-- **Playground** for isolated code testing
-- **libs/** for external or custom libraries
+[x] A working build system
 
----
+[x] Extendable Robot Arm
 
-## Development with Nix
+[x] Shader Configuration
 
-A **Nix flake** provides a consistent development environment.
+[ ] Making the arm toss something maybe
 
-```sh
-nix develop
+[ ] Targets for the arm to hit
+
+## How to build this
+
+
+### Desktop 
+
+For just the desktop application your life is easy, you'll need:
+
+- CMake
+- VCPKG
+- Qt System Dependencies
+
+Use the vcpkg presets and just wait for CMake to configure things out from there, then build.
+
+```bash
+cmake --preset dev-vcpkg
+cmake --build build/dev-vcpkg
 ```
 
 ---
 
-## Building the Project
+### WASM
 
-```sh
-# Configure the build
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+For WASM one step made it quite a bit more involved for me but here's what you'll need
 
-# Build all targets
-cmake --build build
+- CMake
+- Emscripten (I used the arch packaged emscripten which caused multiple headaches)
+- Host Qt install
+- Qt WASM build (Can be downloaded, installed or built from source just make sure emscripten lines up)
+- Alternatively you can figure out a better way to do this
+- You'll also need to update the WASM preset to use your Qt WASM path
 
-# Run tests
-ctest --test-dir build
+After that its basically the same as the desktop build.
 
-# Run benchmarks
-./build/bench/bench
+```bash
+cmake --preset dev-wasm
+cmake --build build/dev-wasm
+emrun build/dev-wasm/src/qt_test.html
 ```
 
----
+--- 
 
-## Project Structure & Extension Guide
+## What I learned 
 
-### `/src` - Source Libraries
+- I learned to appreciate VCPKG 
+- WebGL ≠ OpenGL: no interface blocks in GLSL ES 3.0, different context rules
+- `QOpenGLWindow` + `createWindowContainer()` actually works in WASM unlike `QOpenGLWidget` 
+- The browser is quite quirky when it comes to mouse events and Qt
 
-The `src/` directory is where you define CMake libraries for your project. Here are common patterns:
+## What's missing
 
-#### Basic Library Definition
+The architecture could be cleaner. The robot arm simulation lives inside the rendering code via model matrices, which works surprisingly well but doesn't scale. Future plans:
 
-```cmake
-target_add_library(MyLib src/mylib.cpp src/mylib.hpp)
-
-target_include_directories(MyLib PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  # During build
-    $<INSTALL_INTERFACE:include>                            # After installation
-)
-
-target_compile_features(MyLib PUBLIC cxx_std_23)
-```
-
-**Key Concepts:**
-
-- **BUILD_INTERFACE**: Include paths used when building the project itself
-- **INSTALL_INTERFACE**: Include paths used by external projects after installation
-- **PRIVATE/PUBLIC/INTERFACE**: Controls visibility of properties to consuming targets
-
-#### Header-Only Library
-
-For libraries with only headers (templates, inline functions):
-
-```cmake
-target_add_library(HeaderOnlyLib INTERFACE)
-
-target_include_directories(HeaderOnlyLib INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-target_compile_features(HeaderOnlyLib INTERFACE cxx_std_23)
-```
-
-#### Setting C++ Standard
-
-Explicitly set the C++ for all presets you can change this line in ``CMakePresets.json`` for the `base` preset:
-
-```json lines
-  "CMAKE_CXX_STANDARD": "23" -> "20" 
-```
-
-
-### `/tests` - Unit Tests
-
-Write tests in the `tests/` directory using **Catch2**:
-
-```cpp
-#include <catch2/catch_test_macros.hpp>
-
-TEST_CASE("Addition works") {
-    REQUIRE(2 + 2 == 4);
-}
-```
-
-Run tests:
-
-```sh
-ctest --test-dir build
-```
-
-See `tests/TestTypes.hpp` for advanced testing utilities for validating C++ semantics.
-
-### `/bench` - Benchmarks
-
-Use **Google Benchmark** for performance analysis:
-
-```cpp
-#include <benchmark/benchmark.h>
-
-static void BM_MyFunction(benchmark::State& state) {
-    for (auto _ : state) {
-        benchmark::DoNotOptimize(MyFunction());
-    }
-}
-
-BENCHMARK(BM_MyFunction)->Range(8, 8<<10);
-```
-
-### `/playground` - Experimentation
-
-Use the `playground/` directory for quick testing and prototyping:
-
-```cpp
-#include <print>
-
-int main() {
-    std::println("Quick test here");
-}
-```
-
-Compile and run:
-
-```sh
-cmake --build build
-./build/playground/playground
-```
+- Separate simulation from rendering
+- `RenderQueue` abstraction with automatic instancing
+- Texture/material support
+- Cache uniform locations properly instead of querying every frame
+- Splitting movement from rendering also allows for testing

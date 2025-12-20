@@ -51,7 +51,7 @@
     {
       "name": "wasm",
       "hidden": true,
-      "description": "WebAssembly build using Qt WASM toolchain",
+      "description": "WebAssembly build using Qt WASM toolchain. This is not cross platform, oh well",
       "toolchainFile": "$env{HOME}/Qt/6.10.1/wasm/lib/cmake/Qt6/qt.toolchain.cmake",
       "cacheVariables": {
         "QT_HOST_PATH": "/usr",
