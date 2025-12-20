@@ -9,11 +9,12 @@ if(EMSCRIPTEN)
     target_compile_definitions(qt_test PRIVATE SHADER_PATH="/shaders/")
 else()
     target_add_executable(qt_test)
+    target_compile_definitions(qt_test PRIVATE SHADER_PATH="${CMAKE_SOURCE_DIR}/shaders")
 endif()
 target_include_directories(qt_test PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_sources(qt_test PRIVATE GLWidget.cpp Scene.cpp main.cpp RobotArm.cpp RobotArmControls.cpp
-        InstancedObject.cpp GLCommon.cpp ShaderControls.cpp Camera.cpp
-        ${CMAKE_SOURCE_DIR}/include/QtRendering/GLWidget.hpp
+target_sources(qt_test PRIVATE Scene.cpp main.cpp RobotArm.cpp RobotArmControls.cpp
+        InstancedObject.cpp GLCommon.cpp ShaderControls.cpp Camera.cpp GLWindow.cpp
+        ${CMAKE_SOURCE_DIR}/include/QtRendering/GLWindow.hpp
         ${CMAKE_SOURCE_DIR}/include/QtRendering/RobotArmControls.hpp
         ${CMAKE_SOURCE_DIR}/include/QtRendering/ShaderControls.hpp
 )

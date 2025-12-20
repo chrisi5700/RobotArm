@@ -2,27 +2,27 @@
 #include <QMainWindow>
 #include <QSurfaceFormat>
 #include <QTabWidget>
-#include <QtRendering/GLWidget.hpp>
+#include <QHBoxLayout>
+#include <QtRendering/GLWindow.hpp>
 #include <QtRendering/RobotArmControls.hpp>
 #include <QtRendering/ShaderControls.hpp>
 
 int main(int argc, char* argv[]) {
-	QSurfaceFormat format;
-	format.setDepthBufferSize(24);
-	format.setStencilBufferSize(8);
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
 
 #ifdef __EMSCRIPTEN__
-	format.setVersion(3, 0);
-	format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setVersion(3, 0);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
 #else
-	format.setVersion(4, 6);
-	format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(4, 6);
+    format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
 
-	format.setSwapInterval(1);
-	QSurfaceFormat::setDefaultFormat(format);
+    format.setSwapInterval(1);
+    QSurfaceFormat::setDefaultFormat(format);
     QApplication app(argc, argv);
-
 
     QMainWindow mainWindow;
     mainWindow.setWindowTitle("Robot Arm");
@@ -33,9 +33,11 @@ int main(int argc, char* argv[]) {
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    auto* glWidget = new GLWidget();
+    auto* glWindow = new GLWindow();
+    auto* glContainer = QWidget::createWindowContainer(glWindow, central);
+    glContainer->setMinimumSize(400, 400);
+    glContainer->setFocusPolicy(Qt::StrongFocus);
 
-    // Tab widget for both control panels
     auto* tabs = new QTabWidget();
     tabs->setFixedWidth(350);
 
@@ -45,18 +47,13 @@ int main(int argc, char* argv[]) {
     tabs->addTab(armControls, "Robot Arm");
     tabs->addTab(shaderControls, "Shaders");
 
-    layout->addWidget(glWidget, 1);
+    layout->addWidget(glContainer, 1);
     layout->addWidget(tabs, 0);
 
     mainWindow.setCentralWidget(central);
 
-    // Defer until GL is initialized
-    QObject::connect(glWidget, &QOpenGLWidget::frameSwapped, glWidget, [=]() {
-        static bool initialized = false;
-        if (initialized) return;
-        initialized = true;
-
-        auto& arm = glWidget->get_scene().get_arm();
+    QObject::connect(glWindow, &GLWindow::initialized, glWindow, [=]() {
+        auto& arm = glWindow->get_scene().get_arm();
         arm.add_component(2.0f, 0.0f);
         arm.add_component(1.5f, 0.5f);
         arm.add_component(1.0f, -0.3f);
@@ -64,33 +61,31 @@ int main(int argc, char* argv[]) {
         armControls->addComponentWidget(2.0f, 0.0f);
         armControls->addComponentWidget(1.5f, 0.5f);
         armControls->addComponentWidget(1.0f, -0.3f);
-    }, Qt::SingleShotConnection);
+    });
 
-    // Robot arm signals
     QObject::connect(armControls, &RobotArmControls::componentAdded,
-        [glWidget](float length, float angle) {
-            glWidget->get_scene().get_arm().add_component(length, angle);
+        [glWindow](float length, float angle) {
+            glWindow->get_scene().get_arm().add_component(length, angle);
         });
 
     QObject::connect(armControls, &RobotArmControls::angleChanged,
-        [glWidget](std::size_t index, float angle) {
-            glWidget->get_scene().get_arm().set_target_angle(index, angle);
+        [glWindow](std::size_t index, float angle) {
+            glWindow->get_scene().get_arm().set_target_angle(index, angle);
         });
 
     QObject::connect(armControls, &RobotArmControls::lengthChanged,
-        [glWidget](std::size_t index, float length) {
-            glWidget->get_scene().get_arm().set_length(index, length);
+        [glWindow](std::size_t index, float length) {
+            glWindow->get_scene().get_arm().set_length(index, length);
         });
 
     QObject::connect(armControls, &RobotArmControls::componentRemoved,
-        [glWidget](std::size_t index) {
-            glWidget->get_scene().get_arm().remove_component(index);
+        [glWindow](std::size_t index) {
+            glWindow->get_scene().get_arm().remove_component(index);
         });
 
-    // Shader controls signals
     QObject::connect(shaderControls, &ShaderControls::settingsChanged,
-        [glWidget, shaderControls]() {
-            auto& params = glWidget->get_scene().get_shader_params();
+        [glWindow, shaderControls]() {
+            auto& params = glWindow->get_scene().get_shader_params();
 
             params.ambientStrength = shaderControls->getAmbientStrength();
             params.diffuseStrength = shaderControls->getDiffuseStrength();
