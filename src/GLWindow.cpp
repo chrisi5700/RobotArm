@@ -52,15 +52,22 @@ void GLWindow::paintGL()
 void GLWindow::mousePressEvent(QMouseEvent* event)
 {
 	QOpenGLWindow::mousePressEvent(event);
-	auto pos = event->pos();
-	m_scene->update_last_mouse_pos({pos.x(), pos.y()});
+	m_is_dragging = not m_is_dragging;
 }
+
 
 void GLWindow::mouseMoveEvent(QMouseEvent* event)
 {
 	QOpenGLWindow::mouseMoveEvent(event);
 	auto pos = event->pos();
-	m_scene->drag_camera({pos.x(), pos.y()});
+	if (m_is_dragging)
+	{
+		m_scene->drag_camera({pos.x(), pos.y()});
+	} else
+	{
+		m_scene->update_last_mouse_pos({pos.x(), pos.y()});
+	}
+
 }
 
 void GLWindow::wheelEvent(QWheelEvent* event)

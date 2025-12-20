@@ -30,6 +30,7 @@ private:
 	std::unique_ptr<Scene> m_scene;
 	QChronoTimer m_frame_timer;
 	QElapsedTimer m_elapsed_timer;
+	bool m_is_dragging = false;
 };
 
 #endif

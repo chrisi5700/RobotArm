@@ -33,11 +33,11 @@ void Camera::drag_camera(glm::vec2 delta)
 	static constexpr float PI = 3.14159265358979323846f;
 	m_azimuth += delta.x * SENSITIVITY;											// Horizontal angle
 	m_elevation += delta.y * SENSITIVITY;										// Vertical angle
-	m_elevation = glm::clamp(m_elevation, -PI / 2 + 0.1f, PI / 2 - 0.1f); // Prevent flip
+	m_elevation = glm::clamp(m_elevation, 0.0f, PI / 2 - 0.1f); // Prevent flip
 }
 void Camera::change_camera_distance(float delta)
 {
-	m_distance = std::max(m_distance + delta, 0.0f);
+	m_distance = std::max(m_distance + delta, 1.0f);
 }
 void Camera::draw()
 {

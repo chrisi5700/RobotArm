@@ -134,12 +134,7 @@ void Scene::update_last_mouse_pos(glm::vec2 last_mouse_pos)
 void Scene::drag_camera(glm::vec2 new_mouse_pos)
 {
 	auto delta		  = new_mouse_pos - m_last_mouse_pos;
-	if (m_last_mouse_pos == glm::vec2(0,0))
-	{
-		m_last_mouse_pos  = new_mouse_pos;
-		return;
-	}
-	m_last_mouse_pos  = new_mouse_pos;
+	update_last_mouse_pos(new_mouse_pos);
 	m_camera.drag_camera(delta);
 }
 void Scene::change_camera_distance(float delta)
