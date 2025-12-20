@@ -1,18 +1,18 @@
 //
-// Created by chris on 12/17/25.
+// Created by chris on 12/18/25.
 //
 
-#ifndef OPENGL_TEST_INSTANCEDCUBES_HPP
-#define OPENGL_TEST_INSTANCEDCUBES_HPP
-#include <glad/glad.h>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/glm.hpp>
+#ifndef OPENGL_TEST_ROBOTARM_HPP
+#define OPENGL_TEST_ROBOTARM_HPP
+#include <vector>
 
 #include "Drawable.hpp"
+#include "GLCommon.hpp"
+#include "InstancedObject.hpp"
 
-class InstancedCubes : public Drawable
+class RobotArm : public Drawable
 {
-	static inline float cube_verts[] = {
+	static inline std::array CUBE_VERTS = {
 		// positions          // normals
 		// Back face
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -57,32 +57,32 @@ class InstancedCubes : public Drawable
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
-	struct CubeData {
-		glm::vec3 position;
-		glm::vec3 rotationAxis;
-		float rotationSpeed;
-		glm::vec3 scale;
-		glm::vec3 color;
 
-		glm::mat4 get_model_mat(float time) const {
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, position);
-			model = glm::rotate(model, time * rotationSpeed, glm::normalize(rotationAxis));
-			model = glm::scale(model, scale);
-			return model;
-		}
+	struct Component
+	{
+		float length = 1.0f;
+		float target_angle = 0.0;
+		float current_angle = 1.6;
 	};
 	struct InstanceData {
 		glm::mat4 model; // 4
 		glm::vec3 color; // 7
 		float padding = 0.0f;   // 8
 	};
-	std::vector<CubeData> m_cubes;
-	GLuint m_cube_vao, m_cube_vbo, m_cube_instance_vbo;
-	std::vector<InstanceData> m_cube_instances;
-	public:
-	InstancedCubes();
+	std::vector<Component> m_components;
+	InstancedObject m_segments;
+	InstancedObject m_joints;
+	float last_update = 0.0f;
+
+public:
+	RobotArm();
+	void add_component(float length, float angle);
+	void set_target_angle(std::size_t component_idx, float angle);
+	void set_length(std::size_t component_idx, float length);
+	void remove_component(std::size_t index);
+	void build_instance_data();
+	void update(float time);
 	void draw(float time) override;
-	~InstancedCubes() override;
 };
-#endif // OPENGL_TEST_INSTANCEDCUBES_HPP
+
+#endif // OPENGL_TEST_ROBOTARM_HPP

@@ -49,6 +49,19 @@
       }
     },
     {
+      "name": "wasm",
+      "hidden": true,
+      "description": "WebAssembly build using Qt WASM toolchain",
+      "toolchainFile": "$env{HOME}/Qt/6.10.1/wasm/lib/cmake/Qt6/qt.toolchain.cmake",
+      "cacheVariables": {
+        "QT_HOST_PATH": "/usr",
+        "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE": "BOTH"
+      },
+      "environment": {
+        "EMSDK": "$env{HOME}/emsdk-wrapper"
+      }
+    },
+    {
       "name": "dev-vcpkg",
       "inherits": ["dev", "vcpkg"],
       "description": "Development build with vcpkg dependency management"
@@ -57,6 +70,16 @@
       "name": "release-vcpkg",
       "inherits": ["release", "vcpkg"],
       "description": "Release build with vcpkg dependency management"
+    },
+    {
+      "name": "dev-wasm",
+      "inherits": ["dev", "wasm"],
+      "description": "WebAssembly debug build"
+    },
+    {
+      "name": "release-wasm",
+      "inherits": ["release", "wasm"],
+      "description": "WebAssembly release build"
     }
   ],
   "buildPresets": [
@@ -71,6 +94,11 @@
       "jobs": 0
     },
     {
+      "name": "dev-wasm",
+      "configurePreset": "dev-wasm",
+      "jobs": 0
+    },
+    {
       "name": "release",
       "configurePreset": "release",
       "jobs": 0
@@ -78,6 +106,11 @@
     {
       "name": "release-vcpkg",
       "configurePreset": "release-vcpkg",
+      "jobs": 0
+    },
+    {
+      "name": "release-wasm",
+      "configurePreset": "release-wasm",
       "jobs": 0
     }
   ],
