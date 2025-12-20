@@ -86,7 +86,7 @@ void Scene::upload_shader_params()
 Scene::Scene() :
 	m_program(create_program(SHADER_DIR / "vert.glsl", SHADER_DIR / "frag.glsl")),
 	m_background_program(create_program(SHADER_DIR / "background_vert.glsl", SHADER_DIR / "background_frag.glsl")),
-	m_floor_program(create_program(SHADER_DIR/"grid_floor_vert.glsl", SHADER_DIR / "grid_floor_frag.glsl")),
+	// m_floor_program(create_program(SHADER_DIR/"grid_floor_vert.glsl", SHADER_DIR / "grid_floor_frag.glsl")),
 	m_light_pos_loc(glGetUniformLocation(m_program, "lightPos")),
 	m_view_pos_loc(glGetUniformLocation(m_program, "viewPos")),
 	m_camera(glGetUniformLocation(m_program, "view"), glGetUniformLocation(m_program, "projection"))

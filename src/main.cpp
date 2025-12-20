@@ -1,23 +1,28 @@
 #include <QApplication>
 #include <QMainWindow>
-#include <QHBoxLayout>
+#include <QSurfaceFormat>
 #include <QTabWidget>
 #include <QtRendering/GLWidget.hpp>
 #include <QtRendering/RobotArmControls.hpp>
 #include <QtRendering/ShaderControls.hpp>
 
 int main(int argc, char* argv[]) {
+	QSurfaceFormat format;
+	format.setDepthBufferSize(24);
+	format.setStencilBufferSize(8);
+
 #ifdef __EMSCRIPTEN__
-	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, false);
+	format.setVersion(3, 0);
+	format.setRenderableType(QSurfaceFormat::OpenGLES);
+#else
+	format.setVersion(4, 6);
+	format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
+
+	format.setSwapInterval(1);
+	QSurfaceFormat::setDefaultFormat(format);
     QApplication app(argc, argv);
 
-    QSurfaceFormat format;
-    format.setVersion(4, 6);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setDepthBufferSize(24);
-    format.setSwapInterval(1);
-    QSurfaceFormat::setDefaultFormat(format);
 
     QMainWindow mainWindow;
     mainWindow.setWindowTitle("Robot Arm");

@@ -64,7 +64,7 @@ private:
 	static inline std::filesystem::path SHADER_DIR{SHADER_PATH};
 	GLint m_program;
 	GLint m_background_program;
-	GLint m_floor_program;
+	// GLint m_floor_program;
 	GLint m_light_pos_loc;
 	GLint m_view_pos_loc;
 	GLuint m_empty_vao;

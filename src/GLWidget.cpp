@@ -4,7 +4,6 @@
 
 #include <QtRendering/GLWidget.hpp>
 #include <chrono>
-#include <iostream>
 #include <qopenglcontext.h>
 #include <QMouseEvent>
 
@@ -15,22 +14,7 @@ GLWidget::GLWidget(QWidget* parent)
 	, m_scene(nullptr)
 	, m_frame_timer(16ms)
 {
-	QSurfaceFormat format;
-	format.setDepthBufferSize(24);
-	format.setStencilBufferSize(8);
-	format.setSwapInterval(1);  // VSync
 
-#ifdef __EMSCRIPTEN__
-	// WebGL 2 = OpenGL ES 3.0
-	format.setVersion(3, 0);
-	format.setRenderableType(QSurfaceFormat::OpenGLES);
-#else
-	// Desktop OpenGL 4.6 Core
-	format.setVersion(4, 6);
-	format.setProfile(QSurfaceFormat::CoreProfile);
-#endif
-
-	setFormat(format);
 
 	connect(&m_frame_timer, &QChronoTimer::timeout, this, QOverload<>::of(&GLWidget::update));
 }
@@ -49,11 +33,11 @@ void GLWidget::initializeGL() {
 	}
 #endif
 	// NOW we can create the renderer - GL context exists!
-	m_scene = std::make_unique<Scene>();
+	/*m_scene = std::make_unique<Scene>();
 
 	// Start animation
 	m_elapsed_timer.start();
-	m_frame_timer.start();  // ~60 FPS (1000ms / 60 ≈ 16ms)
+	m_frame_timer.start();  // ~60 FPS (1000ms / 60 ≈ 16ms)*/
 }
 
 void GLWidget::resizeGL(int w, int h) {
@@ -66,10 +50,12 @@ void GLWidget::resizeGL(int w, int h) {
 }
 
 void GLWidget::paintGL() {
-	if (m_scene) {
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);  // Red
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	/*if (m_scene) {
 		float time = m_elapsed_timer.elapsed() / 1000.0f;
 		m_scene->draw(time);
-	}
+	}*/
 }
 void GLWidget::mousePressEvent(QMouseEvent* event)
 {
