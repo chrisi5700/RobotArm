@@ -12,11 +12,18 @@ else()
     target_compile_definitions(robot_arm PRIVATE SHADER_PATH="${CMAKE_SOURCE_DIR}/shaders")
 endif()
 target_include_directories(robot_arm PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_sources(robot_arm PRIVATE Scene.cpp main.cpp RobotArm.cpp RobotArmControls.cpp
-        InstancedObject.cpp GLCommon.cpp ShaderControls.cpp Camera.cpp GLWindow.cpp
-        ${CMAKE_SOURCE_DIR}/include/QtRendering/GLWindow.hpp
-        ${CMAKE_SOURCE_DIR}/include/QtRendering/RobotArmControls.hpp
-        ${CMAKE_SOURCE_DIR}/include/QtRendering/ShaderControls.hpp
+target_sources(robot_arm PRIVATE main.cpp
+        Qt/ShaderControls.cpp Qt/GLWindow.cpp Qt/Scene.cpp Qt/RobotArmControls.cpp
+
+        Rendering/Camera.cpp Rendering/GLCommon.cpp Rendering/Mesh.cpp Rendering/Renderer.cpp Rendering/RenderQueue.cpp
+        Rendering/MeshRegistry.cpp Rendering/ShaderProgram.cpp
+
+
+        Simulation/Simulation.cpp
+
+        ${CMAKE_SOURCE_DIR}/include/RobotArm/Qt/GLWindow.hpp
+        ${CMAKE_SOURCE_DIR}/include/RobotArm/Qt/RobotArmControls.hpp
+        ${CMAKE_SOURCE_DIR}/include/RobotArm/Qt/ShaderControls.hpp
 )
 target_link_libraries(robot_arm PRIVATE
         Qt6::Widgets

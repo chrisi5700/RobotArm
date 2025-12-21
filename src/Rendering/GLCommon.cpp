@@ -1,7 +1,7 @@
 //
 // Created by chris on 12/18/25.
 //
-#include <QtRendering/GLCommon.hpp>
+#include <RobotArm/Rendering/GLCommon.hpp>
 
 MeshData generate_cube()
 {
@@ -98,4 +98,73 @@ MeshData generate_sphere(float radius, uint32_t latSegments, uint32_t lonSegment
 	}
 
 	return mesh;
+}
+
+MeshData generate_cylinder(float radius, float height, uint32_t segments, bool caps) {
+    MeshData data;
+
+    const float half_height = height / 2.0f;
+
+    // Side vertices: two rings
+    for (uint32_t i = 0; i <= segments; ++i) {
+        float angle = (static_cast<float>(i) / segments) * 2.0f * glm::pi<float>();
+        float x = radius * std::cos(angle);
+        float z = radius * std::sin(angle);
+        glm::vec3 normal = glm::normalize(glm::vec3(x, 0.0f, z));
+
+        data.vertices.push_back({{x, -half_height, z}, normal}); // Bottom ring
+        data.vertices.push_back({{x, half_height, z}, normal});  // Top ring
+    }
+
+    // Side indices
+    for (uint32_t i = 0; i < segments; ++i) {
+        uint32_t bl = i * 2;
+        uint32_t tl = i * 2 + 1;
+        uint32_t br = (i + 1) * 2;
+        uint32_t tr = (i + 1) * 2 + 1;
+
+        data.indices.insert(data.indices.end(), {bl, br, tr, bl, tr, tl});
+    }
+
+    if (caps) {
+        // Bottom cap
+        uint32_t bottom_center = static_cast<uint32_t>(data.vertices.size());
+        data.vertices.push_back({{0.0f, -half_height, 0.0f}, {0.0f, -1.0f, 0.0f}});
+
+        uint32_t bottom_ring = static_cast<uint32_t>(data.vertices.size());
+        for (uint32_t i = 0; i <= segments; ++i) {
+            float angle = (static_cast<float>(i) / segments) * 2.0f * glm::pi<float>();
+            data.vertices.push_back({
+                {radius * std::cos(angle), -half_height, radius * std::sin(angle)},
+                {0.0f, -1.0f, 0.0f}
+            });
+        }
+
+        for (uint32_t i = 0; i < segments; ++i) {
+            data.indices.insert(data.indices.end(), {
+                bottom_center, bottom_ring + i + 1, bottom_ring + i
+            });
+        }
+
+        // Top cap
+        uint32_t top_center = static_cast<uint32_t>(data.vertices.size());
+        data.vertices.push_back({{0.0f, half_height, 0.0f}, {0.0f, 1.0f, 0.0f}});
+
+        uint32_t top_ring = static_cast<uint32_t>(data.vertices.size());
+        for (uint32_t i = 0; i <= segments; ++i) {
+            float angle = (static_cast<float>(i) / segments) * 2.0f * glm::pi<float>();
+            data.vertices.push_back({
+                {radius * std::cos(angle), half_height, radius * std::sin(angle)},
+                {0.0f, 1.0f, 0.0f}
+            });
+        }
+
+        for (uint32_t i = 0; i < segments; ++i) {
+            data.indices.insert(data.indices.end(), {
+                top_center, top_ring + i, top_ring + i + 1
+            });
+        }
+    }
+
+    return data;
 }

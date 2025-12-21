@@ -1,11 +1,12 @@
 #include <QApplication>
+#include <QHBoxLayout>
 #include <QMainWindow>
 #include <QSurfaceFormat>
 #include <QTabWidget>
-#include <QHBoxLayout>
-#include <QtRendering/GLWindow.hpp>
-#include <QtRendering/RobotArmControls.hpp>
-#include <QtRendering/ShaderControls.hpp>
+#include <RobotArm/Qt/GLWindow.hpp>
+#include <RobotArm/Qt/ShaderControls.hpp>
+
+#include "RobotArm/Qt/RobotArmControls.hpp"
 
 int main(int argc, char* argv[]) {
     QSurfaceFormat format;
@@ -53,10 +54,10 @@ int main(int argc, char* argv[]) {
     mainWindow.setCentralWidget(central);
 
     QObject::connect(glWindow, &GLWindow::initialized, glWindow, [=]() {
-        auto& arm = glWindow->get_scene().get_arm();
-        arm.add_component(2.0f, 0.0f);
-        arm.add_component(1.5f, 0.5f);
-        arm.add_component(1.0f, -0.3f);
+        auto& arm = glWindow->get_scene().get_simulation();
+        arm.add_segment(2.0f, 0.0f);
+        arm.add_segment(1.5f, 0.5f);
+        arm.add_segment(1.0f, -0.3f);
 
         armControls->addComponentWidget(2.0f, 0.0f);
         armControls->addComponentWidget(1.5f, 0.5f);
@@ -65,27 +66,27 @@ int main(int argc, char* argv[]) {
 
     QObject::connect(armControls, &RobotArmControls::componentAdded,
         [glWindow](float length, float angle) {
-            glWindow->get_scene().get_arm().add_component(length, angle);
+            glWindow->get_scene().get_simulation().add_segment(length, angle);
         });
 
     QObject::connect(armControls, &RobotArmControls::angleChanged,
         [glWindow](std::size_t index, float angle) {
-            glWindow->get_scene().get_arm().set_target_angle(index, angle);
+            glWindow->get_scene().get_simulation().set_segment_target_angle(index, angle);
         });
 
     QObject::connect(armControls, &RobotArmControls::lengthChanged,
         [glWindow](std::size_t index, float length) {
-            glWindow->get_scene().get_arm().set_length(index, length);
+            glWindow->get_scene().get_simulation().set_segment_length(index, length);
         });
 
     QObject::connect(armControls, &RobotArmControls::componentRemoved,
         [glWindow](std::size_t index) {
-            glWindow->get_scene().get_arm().remove_component(index);
+            glWindow->get_scene().get_simulation().remove_component(index);
         });
 
 	QObject::connect(shaderControls, &ShaderControls::settingsChanged,
 	[glWindow, shaderControls]() {
-		auto& params = glWindow->get_scene().get_shader_params();
+		auto params = ShaderParams{};
 
 		// Shadow
 		params.shadowThreshold = shaderControls->getShadowThreshold();
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]) {
 		// Background
 		params.topColor = shaderControls->getTopColor();
 		params.bottomColor = shaderControls->getBottomColor();
+		glWindow->set_shader_params(params);
 	});
 
     mainWindow.show();

@@ -1,10 +1,10 @@
 //
 // Created by chris on 12/19/25.
 //
+#include <../include/RobotArm/Rendering/Camera.hpp>
+#include <algorithm>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <QtRendering/Camera.hpp>
-#include <algorithm>
 
 glm::mat4 Camera::get_view() const
 {
@@ -38,11 +38,4 @@ void Camera::drag_camera(glm::vec2 delta)
 void Camera::change_camera_distance(float delta)
 {
 	m_distance = std::max(m_distance + delta, 1.0f);
-}
-void Camera::draw()
-{
-	auto view = get_view();
-	auto projection = get_projection();
-	glUniformMatrix4fv(m_view_loc, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(m_proj_loc, 1, GL_FALSE, glm::value_ptr(projection));
 }

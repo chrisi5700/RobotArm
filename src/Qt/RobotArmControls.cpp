@@ -1,4 +1,4 @@
-#include <QtRendering/RobotArmControls.hpp>
+#include <../include/RobotArm/Qt/RobotArmControls.hpp>
 #include <QGroupBox>
 #include <QHBoxLayout>
 

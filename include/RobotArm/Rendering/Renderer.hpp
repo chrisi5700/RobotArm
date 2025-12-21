@@ -1,14 +1,15 @@
 //
-// Created by chris on 12/17/25.
+// Created by chris on 12/21/25.
 //
 
-#ifndef OPENGL_TEST_RENDERER_HPP
-#define OPENGL_TEST_RENDERER_HPP
-#include <filesystem>
+#ifndef ROBOTARM_RENDERER_HPP
+#define ROBOTARM_RENDERER_HPP
 #include "GLCommon.hpp"
-
 #include "Camera.hpp"
-#include "RobotArm.hpp"
+#include "MeshRegistry.hpp"
+#include "RenderQueue.hpp"
+#include "ShaderProgram.hpp"
+
 
 struct ShaderParams {
 	// Shadow/lit split
@@ -52,33 +53,16 @@ struct ShaderParams {
 	float gamma = 2.2f;
 };
 
-class Scene
-{
+class Renderer {
+	ShaderProgram m_shader;
+	MeshRegistry m_meshes;
 
 public:
-	Scene();
-	void upload_shader_params();
-	void draw(float time);
-	void update_aspect_ratio(int width, int height);
-	void update_last_mouse_pos(glm::vec2 last_mouse_pos);
-	void drag_camera(glm::vec2 new_mouse_pos);
-	void change_camera_distance(float delta);
-	ShaderParams& get_shader_params();
-	RobotArm& get_arm();
-	~Scene();
-private:
-	static inline std::filesystem::path SHADER_DIR{SHADER_PATH};
-	GLint m_program;
-	GLint m_background_program;
-	// GLint m_floor_program;
-	GLint m_light_pos_loc;
-	GLint m_view_pos_loc;
-	GLuint m_empty_vao;
-	glm::vec2 m_last_mouse_pos{0,0};
-	Camera m_camera;
-	RobotArm m_arm;
-	ShaderParams m_params;
+	Renderer();
+	void render(RenderQueue& queue, const Camera& camera);
+	MeshRegistry& mesh_registry();
+	void push_shader_params(const ShaderParams& params);
 };
 
 
-#endif // OPENGL_TEST_RENDERER_HPP
+#endif // ROBOTARM_RENDERER_HPP

@@ -1,10 +1,8 @@
 //
 // Created by chris on 12/18/25.
 //
-#include <QtRendering/GLCommon.hpp>
-#include <QtRendering/RobotArm.hpp>
-
-
+#include <../include/RobotArm/Rendering/GLCommon.hpp>
+#include <RobotArm/RobotArm.hpp>
 
 RobotArm::RobotArm() : m_segments(generate_cube()), m_joints(generate_sphere(0.3f, 20, 20))
 {}
@@ -35,10 +33,7 @@ void RobotArm::build_instance_data()
 	cube_instances.clear();
 	auto& sphere_instances = m_joints.get_instance_data();
 	sphere_instances.clear();
-	auto floor_model = glm::scale(glm::mat4{1}, glm::vec3{100.0f, 0.5f, 100.0f});
-	floor_model = glm::translate(floor_model, glm::vec3(0, -1, 0));
-	// cube_instances.emplace_back(floor_model,  glm::vec3{69 / 255.f,133 / 255.f,136 / 255.f});
-															// Gruvbox Blue
+
 
 	// This tracks "where is the current joint and what direction are we facing"
 	glm::mat4 joint = glm::mat4(1.0f);
@@ -46,15 +41,14 @@ void RobotArm::build_instance_data()
 	for (const auto& component : m_components)
 	{
 		// 1. Rotate at this joint (this affects everything downstream)
-		joint = joint * glm::rotate(glm::mat4(1.0f), component.current_angle, glm::vec3(0, 0, 1));
+		joint = glm::rotate(joint, component.current_angle, glm::vec3(0, 0, 1));
 
 		// 2. Build the segment's model matrix:
 		//    - Start from current joint position/orientation
 		//    - Move half-length forward (so segment starts at joint, not centered on it)
 		//    - Scale to make it the right size
-		glm::mat4 segment = joint
-						  * glm::translate(glm::mat4(1.0f), glm::vec3(0, component.length / 2.0f, 0))
-						  * glm::scale(glm::mat4(1.0f), glm::vec3(0.3f, component.length, 0.3f));
+		glm::mat4 segment = glm::translate(joint, glm::vec3(0, component.length / 2.0f, 0));
+		segment = glm::scale(segment, glm::vec3(0.3f, component.length, 0.3f));
 
 		cube_instances.emplace_back(segment, glm::vec3(142 / 255.f, 192 / 255.f, 124 / 255.f));
 																	// ^^ Gruvbox Green
@@ -62,7 +56,7 @@ void RobotArm::build_instance_data()
 		// 3. Move joint to the END of this segment (for next iteration)
 		sphere_instances.emplace_back(joint, glm::vec3(204 / 255.f,36 / 255.f,29 / 255.f));
 																	// ^^ Gruvbox Red
-		joint = joint * glm::translate(glm::mat4(1.0f), glm::vec3(0, component.length, 0));
+		joint = glm::translate(joint, glm::vec3(0, component.length, 0));
 	}
 }
 

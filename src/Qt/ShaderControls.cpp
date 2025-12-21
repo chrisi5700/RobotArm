@@ -1,4 +1,4 @@
-#include <QtRendering/ShaderControls.hpp>
+#include <../include/RobotArm/Qt/ShaderControls.hpp>
 #include <QScrollArea>
 
 ColorPicker::ColorPicker(const QString& label, glm::vec3 initial, QWidget* parent)
