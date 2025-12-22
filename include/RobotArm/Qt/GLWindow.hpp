@@ -36,7 +36,7 @@ private:
 	Scene m_scene;
 	QPoint m_last_pos{};
 	qint64 m_last_time{};
-	QChronoTimer m_frame_timer;
+	// QChronoTimer m_frame_timer;
 	QElapsedTimer m_elapsed_timer;
 	bool m_is_dragging = false;
 };

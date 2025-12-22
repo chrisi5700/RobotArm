@@ -13,6 +13,10 @@ integration hell for quite a bit I finally managed to get this running.
 
 - [x] Shader Configuration
 
+- [x] Spinning!
+
+- [x] Proper rendering backend
+
 - [ ] Making the arm toss something maybe
 
 - [ ] Targets for the arm to hit
@@ -54,7 +58,7 @@ After that its basically the same as the desktop build.
 ```bash
 cmake --preset dev-wasm
 cmake --build build/dev-wasm
-emrun build/dev-wasm/src/qt_test.html
+emrun build/dev-wasm/src/robot_arm.html
 ```
 
 --- 
@@ -65,13 +69,9 @@ emrun build/dev-wasm/src/qt_test.html
 - WebGL ≠ OpenGL: no interface blocks in GLSL ES 3.0, different context rules
 - `QOpenGLWindow` + `createWindowContainer()` actually works in WASM unlike `QOpenGLWidget` 
 - The browser is quite quirky when it comes to mouse events and Qt
+- WebGL scheduling is sparse. You can't just naively set a timer to generate a frame 60 times a seconds 
 
 ## What's missing
 
-The architecture could be cleaner. The robot arm simulation lives inside the rendering code via model matrices, which works surprisingly well but doesn't scale. Future plans:
-
-- Separate simulation from rendering
-- `RenderQueue` abstraction with automatic instancing
-- Texture/material support
-- Cache uniform locations properly instead of querying every frame
-- Splitting movement from rendering also allows for testing
+Some of the mentioned featured. I'd also like to have some sort of frame buffer so I don't allocate every frame. This 
+is already running as fast as Qt lets me but why not make it scale better.

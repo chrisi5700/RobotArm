@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
 
-    format.setSwapInterval(1);
+    format.setSwapInterval(0);
     QSurfaceFormat::setDefaultFormat(format);
     QApplication app(argc, argv);
 

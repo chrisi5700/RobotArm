@@ -6,6 +6,7 @@
 #define ROBOTARM_SIMULATION_HPP
 #include <glm/glm.hpp>
 #include <variant>
+#include <vector>
 
 struct ModelMatrixChainOutput
 {

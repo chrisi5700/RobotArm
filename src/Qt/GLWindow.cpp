@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 #include <QMouseEvent>
 
 #ifdef __EMSCRIPTEN__
@@ -14,9 +15,9 @@ using std::chrono_literals::operator""ms;
 GLWindow::GLWindow(QWindow* parent)
 	: QOpenGLWindow(QOpenGLWindow::NoPartialUpdate, parent)
 	, m_renderer(nullptr)
-	, m_frame_timer(16ms)
+	// , m_frame_timer(16ms)
 {
-	connect(&m_frame_timer, &QChronoTimer::timeout, this, QOverload<>::of(&GLWindow::update));
+	// connect(&m_frame_timer, &QChronoTimer::timeout, this, QOverload<>::of(&GLWindow::update));
 }
 
 void GLWindow::initializeGL()
@@ -32,7 +33,7 @@ void GLWindow::initializeGL()
 #endif
 	m_renderer = std::make_unique<Renderer>();
 	m_elapsed_timer.start();
-	m_frame_timer.start();
+	// m_frame_timer.start();
 
 	emit initialized();
 }
@@ -47,11 +48,16 @@ void GLWindow::paintGL()
 {
 	auto time = m_elapsed_timer.elapsed();
 	auto duration = time - m_last_time;
+	if (time % 3 == 0) // My laziness knows no bounds
+	{
+		qInfo() << (1.0f / (duration / 1000.0f)) << "FPS\n";
+	}
 	m_last_time = time;
 	m_scene.get_simulation().tick(duration / 1000.f);
 	m_scene.submit_to(m_render_queue);
 	m_renderer->render(m_render_queue, m_scene.get_camera());
 	m_render_queue.clear();
+	update();
 }
 
 void GLWindow::mousePressEvent(QMouseEvent* event)
