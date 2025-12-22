@@ -10,7 +10,7 @@ MeshId mesh_for(ComponentType type)
 {
 	switch (type)
 	{
-		case ComponentType::Segment: return MeshId::Cube;
+		case ComponentType::Segment: return MeshId::Cylinder;
 		case ComponentType::Joint: return MeshId::Sphere;
 		case ComponentType::Spinner: return MeshId::Cylinder;
 	}
@@ -21,7 +21,7 @@ glm::vec3 color_for(ComponentType type)
 {
 	switch (type)
 	{
-		case ComponentType::Segment: return glm::vec3(142 / 255.f,192 / 255.f,124 / 255.f);
+		case ComponentType::Segment: return glm::vec3(122 / 255.f,230 / 255.f,100 / 255.f);
 		case ComponentType::Joint: return glm::vec3(215 / 255.f,153 / 255.f,33 / 255.f);
 		case ComponentType::Spinner: return glm::vec3(204 / 255.f,36 / 255.f,29 / 255.f);
 	}

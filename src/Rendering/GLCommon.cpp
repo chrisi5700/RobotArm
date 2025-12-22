@@ -87,13 +87,15 @@ MeshData generate_sphere(float radius, uint32_t latSegments, uint32_t lonSegment
 			uint32_t current = lat * (lonSegments + 1) + lon;
 			uint32_t next	 = current + lonSegments + 1;
 
+			// First triangle: CCW winding
 			mesh.indices.push_back(current);
-			mesh.indices.push_back(next);
 			mesh.indices.push_back(current + 1);
+			mesh.indices.push_back(next);
 
+			// Second triangle: CCW winding
 			mesh.indices.push_back(current + 1);
-			mesh.indices.push_back(next);
 			mesh.indices.push_back(next + 1);
+			mesh.indices.push_back(next);
 		}
 	}
 

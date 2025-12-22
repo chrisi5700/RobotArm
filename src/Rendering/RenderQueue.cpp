@@ -14,7 +14,7 @@ std::vector<std::pair<MeshId, std::vector<InstanceData>>> RenderQueue::get_meshe
 	namespace r = std::ranges;
 	r::sort(m_render_commands, {}, &RenderCommand::mesh_id);
 	return m_render_commands
-	| v::chunk_by([](const auto& cmd1, const auto& cmd2) {return cmd1.mesh_id != cmd2.mesh_id; })
+	| v::chunk_by([](const auto& cmd1, const auto& cmd2) {return cmd1.mesh_id == cmd2.mesh_id; })
 	| v::transform([](const r::range auto& chunks)
 	{
 		auto id = chunks.begin()->mesh_id; // Cant be empty since empty chunk -> empty commands

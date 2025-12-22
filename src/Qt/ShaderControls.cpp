@@ -92,7 +92,6 @@ ShaderControls::ShaderControls(QWidget* parent)
     scrollLayout->addWidget(createRimLightGroup());
     scrollLayout->addWidget(createOutlineGroup());
     scrollLayout->addWidget(createFogGroup());
-    scrollLayout->addWidget(createBackgroundGroup());
     scrollLayout->addStretch();
 
     scrollArea->setWidget(scrollWidget);
@@ -209,22 +208,7 @@ QGroupBox* ShaderControls::createFogGroup()
     return group;
 }
 
-QGroupBox* ShaderControls::createBackgroundGroup()
-{
-    auto* group = new QGroupBox("Background");
-    auto* layout = new QVBoxLayout(group);
 
-    m_topColor = new ColorPicker("Top", glm::vec3(0.24f, 0.22f, 0.21f));
-    m_bottomColor = new ColorPicker("Bottom", glm::vec3(0.0f));
-
-    layout->addWidget(m_topColor);
-    layout->addWidget(m_bottomColor);
-
-    connect(m_topColor, &ColorPicker::colorChanged, this, &ShaderControls::settingsChanged);
-    connect(m_bottomColor, &ColorPicker::colorChanged, this, &ShaderControls::settingsChanged);
-
-    return group;
-}
 
 // Shadow getters
 float ShaderControls::getShadowThreshold() const { return m_shadowThreshold->getValue(); }
@@ -253,6 +237,3 @@ bool ShaderControls::isFogEnabled() const { return m_fogEnabled->isChecked(); }
 glm::vec3 ShaderControls::getFogColor() const { return m_fogColor->getColor(); }
 float ShaderControls::getFogDensity() const { return m_fogDensity->getValue(); }
 
-// Background getters
-glm::vec3 ShaderControls::getTopColor() const { return m_topColor->getColor(); }
-glm::vec3 ShaderControls::getBottomColor() const { return m_bottomColor->getColor(); }

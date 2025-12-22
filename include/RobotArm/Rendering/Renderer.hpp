@@ -44,10 +44,6 @@ struct ShaderParams {
 	glm::vec3 lightColor = glm::vec3(1.0f);
 	float lightIntensity = 1.0f;
 
-	// Background
-	glm::vec3 topColor = glm::vec3(0.24f, 0.22f, 0.21f);
-	glm::vec3 bottomColor = glm::vec3(0.0f);
-
 	// Gamma
 	bool enableGamma = true;
 	float gamma = 2.2f;

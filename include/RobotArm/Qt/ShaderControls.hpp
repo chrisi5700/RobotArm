@@ -85,7 +85,6 @@ private:
     QGroupBox* createRimLightGroup();
     QGroupBox* createOutlineGroup();
     QGroupBox* createFogGroup();
-    QGroupBox* createBackgroundGroup();
 
     // Shadow
     FloatSlider* m_shadowThreshold;
@@ -114,7 +113,4 @@ private:
     ColorPicker* m_fogColor;
     FloatSlider* m_fogDensity;
 
-    // Background
-    ColorPicker* m_topColor;
-    ColorPicker* m_bottomColor;
 };

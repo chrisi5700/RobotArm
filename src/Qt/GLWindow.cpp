@@ -45,8 +45,10 @@ void GLWindow::resizeGL(int w, int h)
 
 void GLWindow::paintGL()
 {
-	float time = m_elapsed_timer.elapsed() / 1000.0f;
-	m_scene.get_simulation().tick(time);
+	auto time = m_elapsed_timer.elapsed();
+	auto duration = time - m_last_time;
+	m_last_time = time;
+	m_scene.get_simulation().tick(duration / 1000.f);
 	m_scene.submit_to(m_render_queue);
 	m_renderer->render(m_render_queue, m_scene.get_camera());
 	m_render_queue.clear();

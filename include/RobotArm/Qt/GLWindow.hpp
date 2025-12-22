@@ -34,7 +34,8 @@ private:
 	std::unique_ptr<Renderer> m_renderer;
 	RenderQueue m_render_queue;
 	Scene m_scene;
-	QPoint m_last_pos;
+	QPoint m_last_pos{};
+	qint64 m_last_time{};
 	QChronoTimer m_frame_timer;
 	QElapsedTimer m_elapsed_timer;
 	bool m_is_dragging = false;

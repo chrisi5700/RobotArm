@@ -31,10 +31,13 @@ void Spinner::tick(float dt)
 }
 ModelMatrixChainOutput Spinner::get_model_matrix(glm::mat4 joint_matrix) const
 {
-	// Just attached
-	auto model_matrix = joint_matrix;
+	// Just attached and scaled
+	auto model_matrix = glm::scale(joint_matrix, {0.35f,0.3f,0.35f});
+
 	// Similar to Segment but this rotates vertically
+	joint_matrix = glm::translate(joint_matrix, {0.0f, 0.15f, 0.0f});
 	joint_matrix = glm::rotate(joint_matrix, angle, glm::vec3(0, 1, 0));
+
 	return {model_matrix, joint_matrix};
 }
 void Component::tick(float dt)
@@ -76,11 +79,11 @@ std::vector<RenderData> Simulation::get_render_data() const
 	}
 	return out;
 }
-std::vector<std::tuple<long, ComponentType>> Simulation::get_component_ids() const
+std::vector<ComponentType> Simulation::get_component_types() const
 {
 	namespace v = std::views;
 	namespace r = std::ranges;
-	return m_components | v::transform(to_enum) | v::enumerate | r::to<std::vector>();
+	return m_components | v::transform(to_enum) | r::to<std::vector>();
 }
 void Simulation::add_segment(float length, float angle)
 {

@@ -59,14 +59,19 @@ int main(int argc, char* argv[]) {
         arm.add_segment(1.5f, 0.5f);
         arm.add_segment(1.0f, -0.3f);
 
-        armControls->addComponentWidget(2.0f, 0.0f);
-        armControls->addComponentWidget(1.5f, 0.5f);
-        armControls->addComponentWidget(1.0f, -0.3f);
+        armControls->addSegmentWidget(2.0f, 0.0f);
+        armControls->addSegmentWidget(1.5f, 0.5f);
+        armControls->addSegmentWidget(1.0f, -0.3f);
     });
 
-    QObject::connect(armControls, &RobotArmControls::componentAdded,
+    QObject::connect(armControls, &RobotArmControls::segmentAdded,
         [glWindow](float length, float angle) {
             glWindow->get_scene().get_simulation().add_segment(length, angle);
+        });
+
+    QObject::connect(armControls, &RobotArmControls::spinnerAdded,
+        [glWindow]() {
+            glWindow->get_scene().get_simulation().add_spinner();
         });
 
     QObject::connect(armControls, &RobotArmControls::angleChanged,
@@ -77,6 +82,11 @@ int main(int argc, char* argv[]) {
     QObject::connect(armControls, &RobotArmControls::lengthChanged,
         [glWindow](std::size_t index, float length) {
             glWindow->get_scene().get_simulation().set_segment_length(index, length);
+        });
+
+    QObject::connect(armControls, &RobotArmControls::rotationalSpeedChanged,
+        [glWindow](std::size_t index, float speed) {
+            glWindow->get_scene().get_simulation().set_spinner_rotational_speed(index, speed);
         });
 
     QObject::connect(armControls, &RobotArmControls::componentRemoved,
@@ -115,9 +125,6 @@ int main(int argc, char* argv[]) {
 		params.fogColor = shaderControls->getFogColor();
 		params.fogDensity = shaderControls->getFogDensity();
 
-		// Background
-		params.topColor = shaderControls->getTopColor();
-		params.bottomColor = shaderControls->getBottomColor();
 		glWindow->set_shader_params(params);
 	});
 

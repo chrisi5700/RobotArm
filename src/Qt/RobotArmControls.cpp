@@ -2,25 +2,25 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 
-ComponentWidget::ComponentWidget(std::size_t index, float initialLength, float initialAngle, QWidget* parent)
+SegmentWidget::SegmentWidget(std::size_t index, float initialLength, float initialAngle, QWidget* parent)
     : QWidget(parent)
     , m_index(index)
 {
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(5, 5, 5, 5);
-    
+
     // Header with title and remove button
     auto* header = new QHBoxLayout();
-    auto* title = new QLabel(QString("Segment %1").arg(index));
-    title->setStyleSheet("font-weight: bold;");
+    m_titleLabel = new QLabel(QString("Segment %1").arg(index));
+    m_titleLabel->setStyleSheet("font-weight: bold;");
     auto* removeBtn = new QPushButton("×");
     removeBtn->setFixedSize(20, 20);
     removeBtn->setStyleSheet("color: red; font-weight: bold;");
-    header->addWidget(title);
+    header->addWidget(m_titleLabel);
     header->addStretch();
     header->addWidget(removeBtn);
     layout->addLayout(header);
-    
+
     // Angle slider
     auto* angleLayout = new QHBoxLayout();
     angleLayout->addWidget(new QLabel("Angle:"));
@@ -32,7 +32,7 @@ ComponentWidget::ComponentWidget(std::size_t index, float initialLength, float i
     angleLayout->addWidget(m_angleSlider);
     angleLayout->addWidget(m_angleLabel);
     layout->addLayout(angleLayout);
-    
+
     // Length spinbox
     auto* lengthLayout = new QHBoxLayout();
     lengthLayout->addWidget(new QLabel("Length:"));
@@ -42,65 +42,140 @@ ComponentWidget::ComponentWidget(std::size_t index, float initialLength, float i
     m_lengthSpinBox->setValue(initialLength);
     lengthLayout->addWidget(m_lengthSpinBox);
     layout->addLayout(lengthLayout);
-    
+
     // Connections
     connect(m_angleSlider, &QSlider::valueChanged, this, [this](int value) {
         float angle = value / 100.0f;
         m_angleLabel->setText(QString::number(angle, 'f', 2));
         emit angleChanged(m_index, angle);
     });
-    
+
     connect(m_lengthSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
         emit lengthChanged(m_index, static_cast<float>(value));
     });
-    
+
     connect(removeBtn, &QPushButton::clicked, this, [this]() {
         emit removeRequested(m_index);
     });
-    
-    setStyleSheet("ComponentWidget { border: 1px solid #ccc; border-radius: 4px; }");
+
+    setStyleSheet("SegmentWidget { border: 1px solid #ccc; border-radius: 4px; }");
+}
+
+void SegmentWidget::setIndex(std::size_t index)
+{
+    m_index = index;
+    m_titleLabel->setText(QString("Segment %1").arg(index));
+}
+
+SpinnerWidget::SpinnerWidget(std::size_t index, float initialSpeed, QWidget* parent)
+    : QWidget(parent)
+    , m_index(index)
+{
+    auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(5, 5, 5, 5);
+
+    // Header with title and remove button
+    auto* header = new QHBoxLayout();
+    m_titleLabel = new QLabel(QString("Spinner %1").arg(index));
+    m_titleLabel->setStyleSheet("font-weight: bold; color: #d0421d;");
+    auto* removeBtn = new QPushButton("×");
+    removeBtn->setFixedSize(20, 20);
+    removeBtn->setStyleSheet("color: red; font-weight: bold;");
+    header->addWidget(m_titleLabel);
+    header->addStretch();
+    header->addWidget(removeBtn);
+    layout->addLayout(header);
+
+    // Rotational speed spinbox
+    auto* speedLayout = new QHBoxLayout();
+    speedLayout->addWidget(new QLabel("Speed (rad/s):"));
+    m_speedSpinBox = new QDoubleSpinBox();
+    m_speedSpinBox->setRange(-10.0, 10.0);
+    m_speedSpinBox->setSingleStep(0.1);
+    m_speedSpinBox->setValue(initialSpeed);
+    speedLayout->addWidget(m_speedSpinBox);
+    layout->addLayout(speedLayout);
+
+    // Connections
+    connect(m_speedSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        emit rotationalSpeedChanged(m_index, static_cast<float>(value));
+    });
+
+    connect(removeBtn, &QPushButton::clicked, this, [this]() {
+        emit removeRequested(m_index);
+    });
+
+    setStyleSheet("SpinnerWidget { border: 1px solid #d0421d; border-radius: 4px; }");
+}
+
+void SpinnerWidget::setIndex(std::size_t index)
+{
+    m_index = index;
+    m_titleLabel->setText(QString("Spinner %1").arg(index));
 }
 
 RobotArmControls::RobotArmControls(QWidget* parent)
     : QWidget(parent)
 {
     auto* mainLayout = new QVBoxLayout(this);
-    
-    // Add button at top
-    auto* addButton = new QPushButton("+ Add Segment");
-    addButton->setStyleSheet("padding: 8px; font-weight: bold;");
-    mainLayout->addWidget(addButton);
-    
+
+    // Button layout for adding components
+    auto* buttonLayout = new QHBoxLayout();
+    auto* addSegmentBtn = new QPushButton("+ Add Segment");
+    auto* addSpinnerBtn = new QPushButton("+ Add Spinner");
+    addSegmentBtn->setStyleSheet("padding: 8px; font-weight: bold;");
+    addSpinnerBtn->setStyleSheet("padding: 8px; font-weight: bold; color: #d0421d;");
+    buttonLayout->addWidget(addSegmentBtn);
+    buttonLayout->addWidget(addSpinnerBtn);
+    mainLayout->addLayout(buttonLayout);
+
     // Scroll area for components
     auto* scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    
+
     auto* scrollWidget = new QWidget();
     m_componentsLayout = new QVBoxLayout(scrollWidget);
     m_componentsLayout->setAlignment(Qt::AlignTop);
     m_componentsLayout->addStretch();
-    
+
     scrollArea->setWidget(scrollWidget);
     mainLayout->addWidget(scrollArea);
-    
-    connect(addButton, &QPushButton::clicked, this, [this]() {
-        addComponentWidget(1.0f, 0.0f);
-        emit componentAdded(1.0f, 0.0f);
+
+    connect(addSegmentBtn, &QPushButton::clicked, this, [this]() {
+        addSegmentWidget(1.0f, 0.0f);
+        emit segmentAdded(1.0f, 0.0f);
     });
-    
+
+    connect(addSpinnerBtn, &QPushButton::clicked, this, [this]() {
+        addSpinnerWidget(0.0f);
+        emit spinnerAdded();
+    });
 }
 
-void RobotArmControls::addComponentWidget(float length, float angle)
+void RobotArmControls::addSegmentWidget(float length, float angle)
 {
-    auto* widget = new ComponentWidget(m_componentWidgets.size(), length, angle);
-    
-    connect(widget, &ComponentWidget::angleChanged, this, &RobotArmControls::angleChanged);
-    connect(widget, &ComponentWidget::lengthChanged, this, &RobotArmControls::lengthChanged);
-    connect(widget, &ComponentWidget::removeRequested, this, &RobotArmControls::removeComponentWidget);
-    
+    auto* widget = new SegmentWidget(m_componentWidgets.size(), length, angle);
+
+    connect(widget, &SegmentWidget::angleChanged, this, &RobotArmControls::angleChanged);
+    connect(widget, &SegmentWidget::lengthChanged, this, &RobotArmControls::lengthChanged);
+    connect(widget, &SegmentWidget::removeRequested, this, &RobotArmControls::removeComponentWidget);
+
     m_componentWidgets.push_back(widget);
-    
+
+    // Insert before the stretch
+    m_componentsLayout->insertWidget(m_componentsLayout->count() - 1, widget);
+}
+
+void RobotArmControls::addSpinnerWidget(float speed)
+{
+    auto* widget = new SpinnerWidget(m_componentWidgets.size(), speed);
+
+    connect(widget, &SpinnerWidget::rotationalSpeedChanged, this, &RobotArmControls::rotationalSpeedChanged);
+    connect(widget, &SpinnerWidget::removeRequested, this, &RobotArmControls::removeComponentWidget);
+
+    m_componentWidgets.push_back(widget);
+
     // Insert before the stretch
     m_componentsLayout->insertWidget(m_componentsLayout->count() - 1, widget);
 }
@@ -108,25 +183,28 @@ void RobotArmControls::addComponentWidget(float length, float angle)
 void RobotArmControls::removeComponentWidget(std::size_t index)
 {
     if (index >= m_componentWidgets.size()) return;
-    
+
     auto* widget = m_componentWidgets[index];
     m_componentsLayout->removeWidget(widget);
     widget->deleteLater();
-    
+
     m_componentWidgets.erase(m_componentWidgets.begin() + index);
-    
+
     rebuildIndices();
     emit componentRemoved(index);
 }
 
 void RobotArmControls::rebuildIndices()
 {
-    // After removal, we need to rebuild with correct indices
-    // Simplest approach: just update the title labels
+    // Update indices in all widgets after removal
     for (std::size_t i = 0; i < m_componentWidgets.size(); ++i) {
-        auto* label = m_componentWidgets[i]->findChild<QLabel*>();
-        if (label) {
-            label->setText(QString("Segment %1").arg(i));
+        // Try casting to SegmentWidget first
+        if (auto* segmentWidget = qobject_cast<SegmentWidget*>(m_componentWidgets[i])) {
+            segmentWidget->setIndex(i);
+        }
+        // Try casting to SpinnerWidget
+        else if (auto* spinnerWidget = qobject_cast<SpinnerWidget*>(m_componentWidgets[i])) {
+            spinnerWidget->setIndex(i);
         }
     }
 }

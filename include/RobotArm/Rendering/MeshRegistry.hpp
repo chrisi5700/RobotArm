@@ -5,6 +5,7 @@
 #ifndef ROBOTARM_SHADERREGISTRY_HPP
 #define ROBOTARM_SHADERREGISTRY_HPP
 #include "Mesh.hpp"
+#include <unordered_map>
 
 class MeshRegistry {
 	std::unordered_map<MeshId, Mesh> m_meshes;

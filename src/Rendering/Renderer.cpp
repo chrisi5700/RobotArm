@@ -41,8 +41,19 @@ ShaderProgram load_shader()
 Renderer::Renderer() : m_shader(load_shader()), m_meshes()
 {
 	m_shader.bind();
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	// Enable face culling
+	/*glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);*/
+
+	// Set clear color
+	glClearColor(60 / 255.f,56 / 255.f,54 / 255.f, 1.0f);
 	push_shader_params({});
-	auto sphere = generate_sphere(0.3f, 20, 20);
+	auto sphere = generate_sphere(0.33f, 20, 20);
 	m_meshes.load(MeshId::Sphere, sphere.vertices, sphere.indices);
 	auto cube = generate_cube();
 	m_meshes.load(MeshId::Cube, cube.vertices, cube.indices);

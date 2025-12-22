@@ -59,7 +59,7 @@ class Simulation
 public:
 	void tick(float dt);
 	[[nodiscard]] std::vector<RenderData> get_render_data() const;
-	[[nodiscard]] std::vector<std::tuple<long, ComponentType>> get_component_ids() const;
+	[[nodiscard]] std::vector<ComponentType> get_component_types() const;
 	void add_segment(float length, float angle);
 	void add_spinner();
 	void set_segment_target_angle(std::size_t id, float angle);
