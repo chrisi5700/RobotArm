@@ -73,5 +73,5 @@ emrun build/dev-wasm/src/robot_arm.html
 
 ## What's missing
 
-Some of the mentioned featured. I'd also like to have some sort of frame buffer so I don't allocate every frame. This 
+Some of the mentioned features. I'd also like to have some sort of per frame buffer so I don't allocate every frame. This 
 is already running as fast as Qt lets me but why not make it scale better.
