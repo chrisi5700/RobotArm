@@ -35,11 +35,13 @@ struct MeshData {
 MeshData generate_cube();
 MeshData generate_sphere(float radius, uint32_t latSegments, uint32_t lonSegments);
 MeshData generate_cylinder(float radius, float height, uint32_t segments, bool caps = true);
+MeshData generate_arrow(float shaft_radius, float head_radius, float head_fraction, uint32_t segments);
 enum class MeshId
 {
 	Sphere,
 	Cube,
 	Cylinder,
+	Arrow,
 };
 
 #endif // OPENGL_TEST_GLCOMMON_HPP

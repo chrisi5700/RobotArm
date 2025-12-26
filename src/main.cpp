@@ -54,39 +54,57 @@ int main(int argc, char* argv[]) {
     mainWindow.setCentralWidget(central);
 
     QObject::connect(glWindow, &GLWindow::initialized, glWindow, [=]() {
-        auto& arm = glWindow->get_scene().get_simulation();
-        arm.add_segment(2.0f, 0.0f);
-        arm.add_segment(1.5f, 0.5f);
-        arm.add_segment(1.0f, -0.3f);
+        auto& sim = glWindow->get_scene().get_simulation();
 
-        armControls->addSegmentWidget(2.0f, 0.0f);
-        armControls->addSegmentWidget(1.5f, 0.5f);
-        armControls->addSegmentWidget(1.0f, -0.3f);
+        // Initialize with some example components
+        sim.add_link(2.0f);
+        sim.add_hinge();
+        sim.add_piston(3.0f);
+        sim.add_swivel();
+        sim.add_link(1.5f);
+
+        armControls->addLinkWidget(2.0f);
+        armControls->addHingeWidget(0.0f);
+        armControls->addPistonWidget(3.0f);
+        armControls->addSwivelWidget(0.0f);
+        armControls->addLinkWidget(1.5f);
     });
 
-    QObject::connect(armControls, &RobotArmControls::segmentAdded,
-        [glWindow](float length, float angle) {
-            glWindow->get_scene().get_simulation().add_segment(length, angle);
+    // Component addition signals
+    QObject::connect(armControls, &RobotArmControls::pistonAdded,
+        [glWindow](float maxLength) {
+            glWindow->get_scene().get_simulation().add_piston(maxLength);
         });
 
-    QObject::connect(armControls, &RobotArmControls::spinnerAdded,
+    QObject::connect(armControls, &RobotArmControls::hingeAdded,
         [glWindow]() {
-            glWindow->get_scene().get_simulation().add_spinner();
+            glWindow->get_scene().get_simulation().add_hinge();
         });
 
-    QObject::connect(armControls, &RobotArmControls::angleChanged,
-        [glWindow](std::size_t index, float angle) {
-            glWindow->get_scene().get_simulation().set_segment_target_angle(index, angle);
+    QObject::connect(armControls, &RobotArmControls::swivelAdded,
+        [glWindow]() {
+            glWindow->get_scene().get_simulation().add_swivel();
         });
 
-    QObject::connect(armControls, &RobotArmControls::lengthChanged,
+    QObject::connect(armControls, &RobotArmControls::linkAdded,
+        [glWindow](float length) {
+            glWindow->get_scene().get_simulation().add_link(length);
+        });
+
+    // Component control signals
+    QObject::connect(armControls, &RobotArmControls::pistonTargetLengthChanged,
         [glWindow](std::size_t index, float length) {
-            glWindow->get_scene().get_simulation().set_segment_length(index, length);
+            glWindow->get_scene().get_simulation().set_piston_target_length(index, length);
         });
 
-    QObject::connect(armControls, &RobotArmControls::rotationalSpeedChanged,
+    QObject::connect(armControls, &RobotArmControls::hingeTargetAngleChanged,
+        [glWindow](std::size_t index, float angle) {
+            glWindow->get_scene().get_simulation().set_hinge_target_angle(index, angle);
+        });
+
+    QObject::connect(armControls, &RobotArmControls::swivelRotationalSpeedChanged,
         [glWindow](std::size_t index, float speed) {
-            glWindow->get_scene().get_simulation().set_spinner_rotational_speed(index, speed);
+            glWindow->get_scene().get_simulation().set_swivel_rotation_speed(index, speed);
         });
 
     QObject::connect(armControls, &RobotArmControls::componentRemoved,

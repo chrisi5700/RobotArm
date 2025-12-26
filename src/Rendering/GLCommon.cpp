@@ -170,3 +170,91 @@ MeshData generate_cylinder(float radius, float height, uint32_t segments, bool c
 
     return data;
 }
+MeshData generate_arrow(float shaft_radius, float head_radius, float head_fraction, uint32_t segments)
+{
+	// head_fraction is how much of the total length=1 is the cone head
+	float shaft_length = 1.0f - head_fraction;
+	float head_length  = head_fraction;
+
+	MeshData mesh;
+
+	// Shaft: cylinder from y=0 to y=shaft_length
+	for (uint32_t i = 0; i <= segments; ++i)
+	{
+		float theta = 2.0f * 3.14159265f * static_cast<float>(i) / static_cast<float>(segments);
+		float x		= std::cos(theta);
+		float z		= std::sin(theta);
+
+		glm::vec3 normal{x, 0.0f, z};
+
+		// Bottom vertex
+		mesh.vertices.push_back({{x * shaft_radius, 0.0f, z * shaft_radius}, normal});
+		// Top vertex
+		mesh.vertices.push_back({{x * shaft_radius, shaft_length, z * shaft_radius}, normal});
+	}
+
+	// Shaft indices
+	for (uint32_t i = 0; i < segments; ++i)
+	{
+		uint32_t base = i * 2;
+		mesh.indices.push_back(base);
+		mesh.indices.push_back(base + 1);
+		mesh.indices.push_back(base + 2);
+
+		mesh.indices.push_back(base + 1);
+		mesh.indices.push_back(base + 3);
+		mesh.indices.push_back(base + 2);
+	}
+
+
+	// Cone slope for normal calculation
+	float slope = head_radius / head_length;
+	float ny	= slope / std::sqrt(1.0f + slope * slope);
+	float nxz	= 1.0f / std::sqrt(1.0f + slope * slope);
+
+	// Cone vertices (each triangle gets its own to avoid normal issues)
+	for (uint32_t i = 0; i < segments; ++i)
+	{
+		float theta0 = 2.0f * 3.14159265f * static_cast<float>(i) / static_cast<float>(segments);
+		float theta1 = 2.0f * 3.14159265f * static_cast<float>(i + 1) / static_cast<float>(segments);
+
+		float x0 = std::cos(theta0), z0 = std::sin(theta0);
+		float x1 = std::cos(theta1), z1 = std::sin(theta1);
+
+		glm::vec3 n0{x0 * nxz, ny, z0 * nxz};
+		glm::vec3 n1{x1 * nxz, ny, z1 * nxz};
+		glm::vec3 n_avg = glm::normalize(n0 + n1);
+
+		uint32_t base = mesh.vertices.size();
+
+		// Base edge vertices
+		mesh.vertices.push_back({{x0 * head_radius, shaft_length, z0 * head_radius}, n0});
+		mesh.vertices.push_back({{x1 * head_radius, shaft_length, z1 * head_radius}, n1});
+		// Tip
+		mesh.vertices.push_back({{0.0f, 1.0f, 0.0f}, n_avg});
+
+		mesh.indices.push_back(base);
+		mesh.indices.push_back(base + 2);
+		mesh.indices.push_back(base + 1);
+	}
+
+	// Cone base cap (flat, pointing down)
+	uint32_t cap_center = mesh.vertices.size();
+	mesh.vertices.push_back({{0.0f, shaft_length, 0.0f}, {0.0f, -1.0f, 0.0f}});
+
+	for (uint32_t i = 0; i <= segments; ++i)
+	{
+		float theta = 2.0f * 3.14159265f * static_cast<float>(i) / static_cast<float>(segments);
+		mesh.vertices.push_back(
+			{{std::cos(theta) * head_radius, shaft_length, std::sin(theta) * head_radius}, {0.0f, -1.0f, 0.0f}});
+	}
+
+	for (uint32_t i = 0; i < segments; ++i)
+	{
+		mesh.indices.push_back(cap_center);
+		mesh.indices.push_back(cap_center + 1 + i + 1);
+		mesh.indices.push_back(cap_center + 1 + i);
+	}
+
+	return mesh;
+}

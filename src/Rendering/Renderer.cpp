@@ -59,6 +59,8 @@ Renderer::Renderer() : m_shader(load_shader()), m_meshes()
 	m_meshes.load(MeshId::Cube, cube.vertices, cube.indices);
 	auto cylinder = generate_cylinder(1.0f, 1.0f, 20);
 	m_meshes.load(MeshId::Cylinder, cylinder.vertices, cylinder.indices);
+	auto arrow = generate_arrow(1, 3, 0.2, 16);
+	m_meshes.load(MeshId::Arrow, arrow.vertices, arrow.indices);
 }
 void Renderer::render(RenderQueue& queue, const Camera& camera)
 {
