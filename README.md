@@ -1,6 +1,6 @@
 # Robot Arm | WASM | QT | OpenGL
 
-Leveraging the power of C++ and emscripten I managed to create ABI issues in JS. After being stuck in dependency and 
+Leveraging the power of C++ and emscripten I managed to create ABI issues in JS. After being stuck in dependency and
 integration hell for quite a bit I finally managed to get this running.
 
 ---
@@ -17,15 +17,11 @@ integration hell for quite a bit I finally managed to get this running.
 
 - [x] Proper rendering backend
 
-- [ ] Making the arm toss something maybe
-
-- [ ] Targets for the arm to hit
-
+- [x] Figure out the velocity of each component of the arm
 
 ## How to build this
 
-
-### Desktop 
+### Desktop
 
 For just the desktop application your life is easy, you'll need:
 
@@ -63,15 +59,16 @@ emrun build/dev-wasm/src/robot_arm.html
 
 --- 
 
-## What I learned 
+## What I learned
 
-- I learned to appreciate VCPKG 
+- I learned to appreciate VCPKG
 - WebGL ≠ OpenGL: no interface blocks in GLSL ES 3.0, different context rules
-- `QOpenGLWindow` + `createWindowContainer()` actually works in WASM unlike `QOpenGLWidget` 
+- `QOpenGLWindow` + `createWindowContainer()` actually works in WASM unlike `QOpenGLWidget`
 - The browser is quite quirky when it comes to mouse events and Qt
-- WebGL scheduling is sparse. You can't just naively set a timer to generate a frame 60 times a seconds 
+- WebGL scheduling is sparse. You can't just naively set a timer to generate a frame 60 times a seconds
 
 ## What's missing
 
-Some of the mentioned features. I'd also like to have some sort of per frame buffer so I don't allocate every frame. This 
+Some of the mentioned features. I'd also like to have some sort of per frame buffer so I don't allocate every frame.
+This
 is already running as fast as Qt lets me but why not make it scale better.
